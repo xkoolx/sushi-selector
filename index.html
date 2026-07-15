@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sushi Selector</title>
+  <link rel="stylesheet" href="src/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>🍣 Sushi Selector</h1>
+      <p class="tagline">Can't decide what to order? Tell us what you're in the mood for.</p>
+    </header>
+
+    <section class="filters" aria-label="Preferences">
+      <fieldset>
+        <legend>Diet</legend>
+        <label><input type="radio" name="diet" value="any" checked /> Anything</label>
+        <label><input type="radio" name="diet" value="cooked" /> Cooked only</label>
+        <label><input type="radio" name="diet" value="vegetarian" /> Vegetarian</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Style</legend>
+        <label><input type="checkbox" name="style" value="nigiri" checked /> Nigiri</label>
+        <label><input type="checkbox" name="style" value="maki" checked /> Maki</label>
+        <label><input type="checkbox" name="style" value="sashimi" checked /> Sashimi</label>
+        <label><input type="checkbox" name="style" value="temaki" checked /> Temaki</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Adventurousness</legend>
+        <label><input type="radio" name="adventure" value="classic" checked /> Keep it classic</label>
+        <label><input type="radio" name="adventure" value="adventurous" /> Surprise me</label>
+      </fieldset>
+    </section>
+
+    <button id="select-btn" type="button">Pick my sushi</button>
+
+    <section id="result" class="result hidden" aria-live="polite"></section>
+  </main>
+
+  <script src="src/data.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
