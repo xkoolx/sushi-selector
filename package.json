@@ -1,0 +1,24 @@
+{
+  "name": "sushi-selector",
+  "version": "1.0.0",
+  "description": "hello",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github-tommyk154:TommyK154/sushi-selector.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "wrangler": "^4.111.0"
+  }
+}

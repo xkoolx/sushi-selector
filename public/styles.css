@@ -1,0 +1,104 @@
+/* Sushi Selector base styles. Phase 0 establishes the mobile-first shell,
+   safe-area handling, and the dark-first palette tuned for dim restaurants.
+   Component styles (filter sheet, cards, chips) arrive in Phase 2. */
+
+:root {
+  /* Safe-area insets: every sticky or floating element reads these so nothing
+     sits under the notch or home indicator. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  --max-column: 32rem;
+  --tap-min: 44px;
+
+  --bg: #ffffff;
+  --surface: #f4f5f7;
+  --text: #16181d;
+  --muted: #5b616e;
+  --accent: #e4572e;
+  --border: #e2e4e9;
+}
+
+/* Dark-first: dim restaurants are the primary environment. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1115;
+    --surface: #1a1d24;
+    --text: #f2f3f5;
+    --muted: #a2a8b4;
+    --accent: #ff6f45;
+    --border: #2a2e37;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* 16px minimum on inputs prevents iOS Safari auto-zoom on focus; set the base
+     here so it inherits. */
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+.screen {
+  min-height: 100dvh;
+  max-width: var(--max-column);
+  margin: 0 auto;
+  padding:
+    calc(1rem + var(--safe-top))
+    calc(1rem + var(--safe-right))
+    calc(1rem + var(--safe-bottom))
+    calc(1rem + var(--safe-left));
+}
+
+.app-header {
+  padding: 0.5rem 0 1rem;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+}
+
+.app-tagline {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.placeholder {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Reveal and transition animations respect reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

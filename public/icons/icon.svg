@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Sushi Selector">
+  <rect width="512" height="512" rx="96" fill="#0f1115" />
+  <ellipse cx="256" cy="300" rx="150" ry="70" fill="#f2efe6" />
+  <ellipse cx="256" cy="270" rx="150" ry="70" fill="#ffffff" />
+  <ellipse cx="256" cy="230" rx="110" ry="52" fill="#ff6f45" />
+  <rect x="146" y="212" width="220" height="30" rx="15" fill="#1a1d24" />
+</svg>

@@ -1,0 +1,51 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "sushi-selector",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-07-01",
+
+  // Static frontend served from public/. run_worker_first routes /api/* to the
+  // worker so API calls are never answered by static asset serving (the classic
+  // Static Assets routing gotcha). Everything else falls through to assets.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "none",
+    "run_worker_first": ["/api/*"]
+  },
+
+  // Native rate limit bindings (GA, free). period must be exactly 10 or 60.
+  // Extract endpoints key on the session token (6 per 60s); session issuance
+  // keys on client IP (3 per 60s). namespace_id values are arbitrary but must
+  // be stable and unique per limiter.
+  "ratelimits": [
+    {
+      "name": "EXTRACT_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 6, "period": 60 }
+    },
+    {
+      "name": "SESSION_LIMITER",
+      "namespace_id": "1002",
+      "simple": { "limit": 3, "period": 60 }
+    }
+  ],
+
+  // Non-secret config. Secrets (ANTHROPIC_API_KEY, TURNSTILE_SECRET_KEY,
+  // SESSION_HMAC_SECRET) live in wrangler secrets / .dev.vars, never here.
+  // TURNSTILE_SITE_KEY is public by design; ALLOWED_ORIGINS gains the
+  // workers.dev production origin after the first deploy.
+  "vars": {
+    "MODEL": "claude-haiku-4-5-20251001",
+    "TURNSTILE_SITE_KEY": "REPLACE_WITH_TURNSTILE_SITE_KEY",
+    "ALLOWED_ORIGINS": "http://localhost:8787"
+  },
+
+  // Structured log lines per Anthropic call (token usage, cache counters,
+  // latency) are queryable in the dashboard with observability on.
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}

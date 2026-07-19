@@ -1,0 +1,16 @@
+Phase 0 local dev verification (npx wrangler dev, port 8787)
+Generated during scaffold; re-runnable with: npx wrangler dev
+
+GET /api/health ->
+{"status":"ok","model":"claude-haiku-4-5-20251001"}
+
+GET / (static shell) ->
+  http=200 type=text/html; charset=utf-8 bytes=1112
+GET /manifest.webmanifest ->
+  http=200 type=application/manifest+json
+GET /icons/icon.svg ->
+  http=200 type=image/svg+xml
+GET /api/unknown (expect 404) ->
+  http=404
+GET /api/menus/abc (reserved, expect 404) ->
+  http=404

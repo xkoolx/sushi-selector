@@ -1,0 +1,197 @@
+# Sushi Selector: Implementation Plan
+# Version: 1.1
+# Date: 2026-07-15
+# Derived from: ScrollTheory and Tommy K plan v1.0, corrected to match the
+#   current SPEC.md (URL ingestion and flagged-item fix flow are in MVP; both
+#   have full spec sections). SPEC.md wins on any conflict with this file.
+# Source docs: CLAUDE.md, SPEC.md, HANDOFF.md, EVALS.md, DEPLOY.md
+
+prd:
+  product_name: "Sushi Selector"
+  version: "MVP 1.0"
+
+  mission: >
+    Turn a photo of a restaurant menu into a filterable, searchable list of
+    items with ingredients and prices. At the table, on a phone, in under 30
+    seconds. Extraction reliability is the product.
+
+  user_stories:
+    - id: US-1
+      as: "a diner"
+      i_want: "to photograph the menu and get a parsed list of items with ingredients"
+      acceptance: "Photo to parsed results in under 30 seconds on a 40+ item menu"
+    - id: US-2
+      as: "a diner with allergies"
+      i_want: "to exclude specific ingredients and see only safe items"
+      acceptance: "Tri-state chips: neutral, include (must have), exclude (must not have)"
+    - id: US-3
+      as: "an indecisive diner"
+      i_want: "a suggestion from my filtered results"
+      acceptance: "Omakase no-repeat shuffle with reroll and a playful exhaustion state"
+    - id: US-4
+      as: "a diner with a multi-page menu"
+      i_want: "to photograph up to 6 pages and get one merged list"
+      acceptance: "Per-photo pipelines, merge in photo order, dual-condition dedupe"
+    - id: US-5
+      as: "a diner who lost wifi mid-parse"
+      i_want: "the app to resume where it left off on reload"
+      acceptance: "Job persists to localStorage, resumes within 30 minutes"
+    - id: US-6
+      as: "a diner who sees a flagged item"
+      i_want: "to retry it or fix its ingredients with minimal typing"
+      acceptance: "Retry fires a single-item details call; fix sheet offers menu-vocabulary chips, then autocomplete, then free text (SPEC flagged-items rules)"
+    - id: US-7
+      as: "a diner at a restaurant with an online menu"
+      i_want: "to paste the menu URL instead of photographing it"
+      acceptance: "URL parse completes and renders; under 5 items triggers the snap-a-photo suggestion"
+
+  non_functional_requirements:
+    - { id: NFR-1, category: performance, requirement: "40+ item photo menu parsed in under 30 seconds on default model" }
+    - { id: NFR-2, category: accuracy, requirement: "Item recall and precision >= 0.97, ingredient F1 >= 0.90, price accuracy >= 0.97 (photo golden set)" }
+    - { id: NFR-3, category: consistency, requirement: "Identical item counts across 3 runs on designated menus, F1 spread <= 0.03" }
+    - { id: NFR-4, category: cost, requirement: "Operate within $5/month spend cap; 60 to 160 parses per $5 expected" }
+    - { id: NFR-5, category: security, requirement: "No unauthenticated extraction access; no secrets in repo or history" }
+    - { id: NFR-6, category: mobile, requirement: "SPEC mobile standards verified on a real phone" }
+
+  out_of_scope:
+    - "User accounts (beyond anonymous session tokens)"
+    - "KV share links"
+    - "Dish photo extraction"
+    - "Multi-language menus"
+    - "Per-restaurant filter memory"
+    - "Smarter zero-results suggestions"
+    - "Non-sushi optimization (bonus if it works)"
+
+  risks:
+    - id: R-1
+      risk: "Haiku 4.5 cannot meet eval gates on difficult menus"
+      mitigation: "Escalate to Sonnet 4.6 after honest prompt iteration, record cost delta in the eval report"
+      impact: "Per-parse cost roughly 3x, cutting parses per $5 to roughly a third"
+    - id: R-2
+      risk: "Prompt caching does not activate (4,096 token minimum on Haiku 4.5)"
+      mitigation: "system.md targets 2,500+ tokens so prefix clears the floor; cache counters logged on every call; zero reads on later details calls is a bug"
+      impact: "Input cost per parse roughly 5x if uncached"
+    - id: R-3
+      risk: "10ms CPU ceiling exceeded on Workers free plan"
+      mitigation: "Worker never decodes images; single JSON.parse; size cap before body read"
+      impact: "Error 1102; $5/month Workers Paid resolves if it ever bites"
+    - id: R-4
+      risk: "Anthropic outage during active use"
+      mitigation: "Provider interface seam in extract.ts; Gemini adapter is post-MVP"
+      impact: "App cannot parse until recovery; cached menus still work"
+    - id: R-5
+      risk: "URL parses fail on JS-rendered or PDF-viewer menus"
+      mitigation: "Under-5-items error UX suggests snapping a photo; photo path is primary"
+      impact: "Degraded URL path only"
+
+pdr:
+  architecture: >
+    Static PWA plus thin TypeScript Worker proxy on Cloudflare free plan.
+    All orchestration in the browser. No database in MVP. See SPEC.md for
+    the authoritative contracts.
+  stack_notes:
+    rate_limiting: "Native ratelimit binding: 6 per 60s per session token on extract, 3 per 60s per IP on session issuance"
+    caching: "cache_control on image block; stable prefix must clear 4,096 tokens; warm-then-fan-out orchestration"
+    url_ingestion: "Anthropic web fetch server tool, combined schema single call, fallback to two-phase"
+    logging: "Structured JSON log per Anthropic call with cache counters; observability enabled"
+    wrangler: "Workers Static Assets with run_worker_first for /api/*"
+
+phases:
+
+  - phase: 0
+    name: "Scaffold"
+    entry: "Tom preflight complete (DEPLOY.md)"
+    exit: "npx wrangler dev serves index.html with /api/health responding"
+    effort: "2 to 4 hours"
+    tasks:
+      - { id: T-0.1, title: "Repo structure per SPEC.md", detail: "All dirs, evals photos/ subdirs, .gitignore with .dev.vars", depends: [] }
+      - { id: T-0.2, title: "wrangler.jsonc", detail: "Static assets, run_worker_first ['/api/*'], ratelimits (extract 6/60s, session 3/60s), vars, observability on. Verify current config shape in live docs.", depends: [T-0.1] }
+      - { id: T-0.3, title: "Hello-world worker", detail: "GET /api/health, CORS for dev origin", depends: [T-0.2] }
+      - { id: T-0.4, title: "Static shell", detail: "index.html with viewport-fit=cover and manifest link; base styles with safe-area vars", depends: [T-0.1], parallel_with: T-0.3 }
+      - { id: T-0.5, title: "Local dev verification", detail: "wrangler dev serves both; screenshot as evidence", depends: [T-0.3, T-0.4] }
+    checkpoint: "Stop here and confirm with Tom before any API-credit spend."
+
+  - phase: 1
+    name: "Extraction pipeline and evals"
+    entry: "Phase 0 done, photos in evals/menus/raw/"
+    exit: "uv run evals/run_evals.py --all passes every gate"
+    effort: "10 to 18 hours (prompt iteration is the variable)"
+    tasks:
+      - { id: T-1.1, title: "Image preprocessing (preprocess.js)", detail: "EXIF orientation, 1568px downscale, JPEG quality ladder, base64, 1 to 6 photos", depends: [T-0.5] }
+      - { id: T-1.2, title: "Extraction schemas", detail: "index, details, and combined URL schema per SPEC; additionalProperties false", depends: [T-0.1], parallel_with: T-1.1 }
+      - { id: T-1.3, title: "System prompt and task instructions", detail: "system.md targets 2,500+ tokens of real guidance (cache floor); index, details, and URL task files", depends: [T-1.2], note: "Most iterated artifact" }
+      - { id: T-1.4, title: "Alias table", detail: "shared/aliases.json, expanded from eval findings", depends: [T-1.3] }
+      - { id: T-1.5, title: "extract.ts: provider interface + Anthropic impl", detail: "Structured outputs via output_config (verify live docs), cache_control on image, tool-use fallback, cache counters logged", depends: [T-1.2, T-1.3] }
+      - { id: T-1.6, title: "session.ts", detail: "Turnstile siteverify with idempotency_key; HMAC token {exp, jti}, no IP binding; crypto.subtle constant-time verify; size cap before body read", depends: [T-0.3], parallel_with: T-1.5 }
+      - { id: T-1.7, title: "ratelimit.ts", detail: "Native binding, two namespaces, 429 with retry-after and friendly copy", depends: [T-0.2, T-1.6] }
+      - { id: T-1.8, title: "Worker router", detail: "session, extract/index, extract/details endpoints; CORS, 413, item cap, structured logging", depends: [T-1.5, T-1.6, T-1.7] }
+      - { id: T-1.9, title: "Client state machine (app.js)", detail: "Warm-then-fan-out, per-photo pipelines, merge and dedupe, localStorage resume keyed on ordered photo hashes", depends: [T-1.1, T-1.8] }
+      - { id: T-1.10, title: "Organize photos + draft goldens", detail: "Slugify into photos/ dirs; hand-label goldens from photos, never via pipeline", depends: [T-0.1], requires_human: "Tom reviews every golden.json", parallel_with: T-1.5 }
+      - { id: T-1.11, title: "Eval harness", detail: "PEP 723 + uv; loads shared/ directly; --all --menu --repeat --batch --url-smoke; report with gates, diffs, cache counters, cost", depends: [T-1.2, T-1.3, T-1.4] }
+      - { id: T-1.12, title: "Prompt iteration loop", detail: "Evals, adjust, commit change with report, repeat until gates pass; escalate model only after honest iteration", depends: [T-1.10, T-1.11, T-1.5], note: "Budget most of Phase 1 here" }
+      - { id: T-1.13, title: "URL ingestion endpoint", detail: "/api/extract/url per SPEC: web fetch tool (verify current tool name and beta header in live docs), combined schema, max_tokens 8192, fallback to two-phase with url in place of image", depends: [T-1.5, T-1.8] }
+      - { id: T-1.14, title: "URL smoke evals", detail: "--url-smoke against 1 to 2 live menu URLs, loose assertions, reported not gated", depends: [T-1.11, T-1.13] }
+
+  - phase: 2
+    name: "UI"
+    entry: "Phase 1 gates passing"
+    exit: "UI acceptance criteria pass on a real phone"
+    effort: "7 to 12 hours"
+    tasks:
+      - { id: T-2.1, title: "Home screen", detail: "Batch-first capture (1 to 6 photos, removable thumbnails, single submit), URL field, recent menus, Turnstile at submit", depends: [T-1.9, T-1.13] }
+      - { id: T-2.2, title: "Progress screen", detail: "State machine visible, per-photo progress, resume hint, SPEC error UX", depends: [T-1.9] }
+      - { id: T-2.3, title: "Item cards + parse quality line", detail: "Highlights, raw and wrap badges, null-price sink, flagged and edited counts", depends: [T-1.9] }
+      - { id: T-2.4, title: "Filter bottom sheet", detail: "Chip search, tri-state chips, wrap and raw chips, 44px targets, safe-area inset", depends: [T-2.3] }
+      - { id: T-2.5, title: "Search and sort", detail: "Substring search, three sort modes, composes with filters", depends: [T-2.4] }
+      - { id: T-2.6, title: "Omakase", detail: "No-repeat shuffle queue, rebuild on filter change, scroll-to-card reveal with chef's pick tag, exhaustion state with second lap and open filters", depends: [T-2.3, T-2.4] }
+      - { id: T-2.7, title: "Flagged-item fix flow", detail: "Retry (single-item details call), then fix sheet: vocabulary chips, autocomplete, free text last; edits normalized into facets, edited marker, persisted", depends: [T-2.3] }
+      - { id: T-2.8, title: "PWA", detail: "Manifest plus service worker caching static assets only, never /api", depends: [T-2.1], parallel_with: T-2.4 }
+      - { id: T-2.9, title: "Mobile standards verification", detail: "Real phone: no input zoom, 44px targets, safe areas, bottom sheet; screenshots as evidence", depends: [T-2.1, T-2.2, T-2.3, T-2.4], requires_human: "Tom tests on his phone" }
+
+  - phase: 3
+    name: "Hardening"
+    entry: "Phase 2 complete"
+    exit: "All negative tests pass"
+    effort: "2 to 4 hours"
+    tasks:
+      - { id: T-3.1, title: "Turnstile negative tests", detail: "Garbage, expired, replayed token all 403", depends: [T-1.6] }
+      - { id: T-3.2, title: "Session token negative tests", detail: "Missing 401, tampered 401, expired 401", depends: [T-1.6] }
+      - { id: T-3.3, title: "Payload negative tests", detail: "Oversize 413, items over 10 gets 400, bad URL scheme 400", depends: [T-1.8, T-1.13] }
+      - { id: T-3.4, title: "Rate limit negative test", detail: "7th call in 60s on one session gets 429 with retry-after", depends: [T-1.7] }
+      - { id: T-3.5, title: "CORS negative test", detail: "Disallowed origin gets no allow header", depends: [T-1.8] }
+      - { id: T-3.6, title: "Secrets audit", detail: "grep across working tree and git history, zero matches", depends: [T-0.1] }
+
+  - phase: 4
+    name: "Ship"
+    entry: "Phase 3 complete"
+    exit: "Acceptance checklist walked with evidence"
+    effort: "2 to 4 hours"
+    tasks:
+      - { id: T-4.1, title: "GitHub Action deploy", detail: "Push to main, wrangler-action (verify current version), least privilege, only Cloudflare secrets in GitHub", depends: [T-3.6] }
+      - { id: T-4.2, title: "Post-deploy verification", detail: "DEPLOY.md checks against live URL plus a real phone parse", depends: [T-4.1], requires_human: "Tom parses from his phone" }
+      - { id: T-4.3, title: "Final eval report", detail: "Full run committed to evals/reports/", depends: [T-4.2] }
+      - { id: T-4.4, title: "README", detail: "Architecture, screenshots, eval table, security model, for a technical reader", depends: [T-4.3], requires_human: "Tom captures screenshots" }
+      - { id: T-4.5, title: "Walk acceptance checklist", detail: "Every HANDOFF item with evidence; undemonstrable item is a reported blocker", depends: [T-4.2, T-4.3, T-4.4] }
+
+critical_path:
+  sequence: >
+    T-0.1 > T-0.2 > T-0.3 > T-0.5 > T-1.2 > T-1.3 > T-1.5 > T-1.8 > T-1.9 >
+    T-1.10 > T-1.11 > T-1.12 > T-2.1 > T-2.3 > T-2.4 > T-2.9 > T-3.x > T-4.1 > T-4.5
+  notes:
+    - "T-1.13 and T-1.14 (URL path) run parallel with T-1.12 once T-1.8 exists"
+    - "T-1.10 (goldens) starts the moment photos arrive"
+    - "T-1.6 and T-1.7 parallel with T-1.5"
+  human_gates:
+    - { task: T-1.10, gate: "Tom reviews golden.json files" }
+    - { task: T-2.9, gate: "Tom tests on a real phone" }
+    - { task: T-4.2, gate: "Tom runs a live parse" }
+    - { task: T-4.4, gate: "Tom captures screenshots" }
+  total_effort: "23 to 42 hours"
+
+post_mvp:
+  - { id: PM-1, title: "KV share links", seam: "Reserved /api/menus/:id route" }
+  - { id: PM-2, title: "Gemini adapter", seam: "Provider interface in extract.ts", trigger: "Cap exhaustion by choice or provider outage" }
+  - { id: PM-3, title: "Per-restaurant filter memory" }
+  - { id: PM-4, title: "Smart Omakase with preferences" }
+  - { id: PM-5, title: "Dish photo extraction" }
+  - { id: PM-6, title: "Smarter zero-results suggestions" }
