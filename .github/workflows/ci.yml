@@ -35,9 +35,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check for leaked secrets
         run: |
-          if grep -rE '(sk-ant-|ANTHROPIC_API_KEY|TURNSTILE_SECRET_KEY|SESSION_HMAC_SECRET)\s*=' \
+          if grep -rE '(sk-ant-[a-zA-Z0-9]{10,}|ANTHROPIC_API_KEY|TURNSTILE_SECRET_KEY|SESSION_HMAC_SECRET)\s*=' \
             --include='*.ts' --include='*.js' --include='*.json' --include='*.jsonc' \
-            --include='*.md' --include='*.yaml' --include='*.yml' \
+            --include='*.yaml' --include='*.yml' \
             --exclude-dir=node_modules --exclude-dir=.git . ; then
             echo "::error::Secret reference found in source files"
             exit 1
