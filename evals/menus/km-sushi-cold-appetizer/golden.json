@@ -1,0 +1,14 @@
+{
+  "restaurant_name": "KM Sushi",
+  "source_photos": ["IMG_3440"],
+  "items": [
+    { "n": 1, "name": "CA1 Sushi Sampler", "section": "Cold Appetizer", "price_text": "14.95", "price": 14.95, "ingredients": ["assorted fish"], "wrap": "none", "is_raw": true, "notes": "6 pcs assorted sushi, chef's choice; INFERRED (menu does not name the fish)" },
+    { "n": 2, "name": "CA2 Sashimi Sampler", "section": "Cold Appetizer", "price_text": "15.95", "price": 15.95, "ingredients": ["assorted fish"], "wrap": "none", "is_raw": true, "notes": "8 pcs assorted sashimi, chef's choice; INFERRED (menu does not name the fish)" },
+    { "n": 3, "name": "CA3 Fresh Tofu", "section": "Cold Appetizer", "price_text": "7.99", "price": 7.99, "ingredients": ["tofu", "yuzu dressing", "ponzu", "scallion", "fried garlic"], "wrap": "none", "is_raw": false, "notes": "menu prints fried sliced garlic topping" },
+    { "n": 4, "name": "CA4 Tataki", "section": "Cold Appetizer", "price_text": "14.99", "price": 14.99, "ingredients": ["seared garlic tuna", "garlic spinach"], "wrap": "none", "is_raw": true, "notes": "5 pcs, seared outside with raw center, garlic spinach on top" },
+    { "n": 5, "name": "CA5 Seared Yellowtail", "section": "Cold Appetizer", "price_text": "14.95", "price": 14.95, "ingredients": ["yellowtail belly", "jalapeno"], "wrap": "none", "is_raw": true, "notes": "6 pcs seared yellowtail belly sashimi, sliced jalapeno on top" },
+    { "n": 6, "name": "CA6 Chilled Oyster", "section": "Cold Appetizer", "price_text": "8.99", "price": 8.99, "ingredients": ["oyster", "ponzu", "scallion", "sriracha", "smelt roe"], "wrap": "none", "is_raw": true, "notes": "3 pcs half shell oyster, raw shellfish" },
+    { "n": 7, "name": "CA7 Oyster Shooter", "section": "Cold Appetizer", "price_text": "7.50", "price": 7.50, "ingredients": ["oyster", "quail egg", "ponzu", "smelt roe", "tabasco", "sriracha", "scallion"], "wrap": "none", "is_raw": true, "notes": "raw shellfish shooter" },
+    { "n": 8, "name": "CA8 Uni Shooter", "section": "Cold Appetizer", "price_text": "13.99", "price": 13.99, "ingredients": ["sea urchin", "ponzu", "smelt roe", "tabasco", "sriracha", "scallion", "quail egg"], "wrap": "none", "is_raw": true, "notes": "menu prints Qauil Egg, a typo for quail egg" }
+  ]
+}

@@ -1,0 +1,338 @@
+{
+  "restaurant_name": "KM Sushi",
+  "source_photos": [
+    "IMG_3436"
+  ],
+  "items": [
+    {
+      "n": 1,
+      "name": "Sunrise",
+      "section": "Fresh Roll",
+      "price_text": "$16.99",
+      "price": 16.99,
+      "ingredients": [
+        "spicy tuna",
+        "avocado",
+        "cucumber",
+        "garlic paste",
+        "seared tuna"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "printed 'avo' normalized to avocado"
+    },
+    {
+      "n": 2,
+      "name": "Yellowtail Lover",
+      "section": "Fresh Roll",
+      "price_text": "$17.50",
+      "price": 17.5,
+      "ingredients": [
+        "spicy tuna",
+        "cucumber",
+        "cilantro",
+        "jalapeno",
+        "yellowtail"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "printed 'cuc' normalized to cucumber"
+    },
+    {
+      "n": 3,
+      "name": "Garlic Albacore",
+      "section": "Fresh Roll",
+      "price_text": "$15.99",
+      "price": 15.99,
+      "ingredients": [
+        "spicy tuna",
+        "cucumber",
+        "albacore",
+        "fried garlic"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 4,
+      "name": "Chaos",
+      "section": "Fresh Roll",
+      "price_text": "$17.99",
+      "price": 17.99,
+      "ingredients": [
+        "spicy crab",
+        "avocado",
+        "jalapeno",
+        "cilantro",
+        "seaweed salad",
+        "albacore",
+        "garlic paste",
+        "sesame oil",
+        "sliced lemon"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 5,
+      "name": "Mexican",
+      "section": "Fresh Roll",
+      "price_text": "$14.99",
+      "price": 14.99,
+      "ingredients": [
+        "spicy crab",
+        "avocado",
+        "cilantro",
+        "pickled jalapeno",
+        "tempura crunch",
+        "potato crunch"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "printed 'tempura & potato crunch' normalized to tempura crunch plus potato crunch"
+    },
+    {
+      "n": 6,
+      "name": "Ventura",
+      "section": "Fresh Roll",
+      "price_text": "$16.75",
+      "price": 16.75,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "cream cheese",
+        "imitation crab",
+        "potato crunch"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "printed 'stick crab' normalized to imitation crab per aliases"
+    },
+    {
+      "n": 7,
+      "name": "Caterpillar",
+      "section": "Fresh Roll",
+      "price_text": "$16.75",
+      "price": 16.75,
+      "ingredients": [
+        "crab meat",
+        "cucumber",
+        "eel",
+        "avocado"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "printed 'fresh water eel' normalized to eel per aliases; eel is cooked"
+    },
+    {
+      "n": 8,
+      "name": "BBQ",
+      "section": "Fresh Roll",
+      "price_text": "$18.95",
+      "price": 18.95,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "marinated beef short rib"
+      ],
+      "wrap": "nori",
+      "is_raw": false
+    },
+    {
+      "n": 9,
+      "name": "Vegas",
+      "section": "Fresh Roll",
+      "price_text": "$17.99",
+      "price": 17.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "spicy tuna",
+        "deep fried eel"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 10,
+      "name": "Spider",
+      "section": "Tempura Roll",
+      "price_text": "$14.99",
+      "price": 14.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "deep fried soft shell crab",
+        "smelt roe"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "printed 'masago' normalized to smelt roe; crab is fried, roe counted as raw per nigiri golden convention"
+    },
+    {
+      "n": 11,
+      "name": "Rainbow Spider",
+      "section": "Tempura Roll",
+      "price_text": "$18.99",
+      "price": 18.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "deep fried soft shell crab",
+        "tuna",
+        "salmon",
+        "albacore",
+        "white tuna",
+        "shrimp",
+        "smelt roe",
+        "black flying fish roe"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "printed 'escolar' normalized to white tuna, 'masago' to smelt roe, 'black tobiko' to black flying fish roe per aliases"
+    },
+    {
+      "n": 12,
+      "name": "Jessica",
+      "section": "Tempura Roll",
+      "price_text": "$17.99",
+      "price": 17.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "shrimp tempura",
+        "asparagus",
+        "tuna",
+        "salmon"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 13,
+      "name": "Casanova",
+      "section": "Tempura Roll",
+      "price_text": "$17.75",
+      "price": 17.75,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "shrimp tempura",
+        "salmon",
+        "tempura crunch"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 14,
+      "name": "Crunch",
+      "section": "Tempura Roll",
+      "price_text": "$15.99",
+      "price": 15.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "shrimp tempura",
+        "tempura crunch",
+        "potato crunch"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "printed 'tempura & potato crunch' normalized to tempura crunch plus potato crunch"
+    },
+    {
+      "n": 15,
+      "name": "Kick",
+      "section": "Tempura Roll",
+      "price_text": "$17.95",
+      "price": 17.95,
+      "ingredients": [
+        "spicy tuna",
+        "avocado",
+        "jalapeno",
+        "shrimp tempura",
+        "yellowtail",
+        "starched red onion"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "'starched red onion' transcribed as printed"
+    },
+    {
+      "n": 18,
+      "name": "Florida",
+      "section": null,
+      "price_text": "$16.99",
+      "price": 16.99,
+      "ingredients": [
+        "spicy crab",
+        "cream cheese",
+        "cilantro",
+        "salmon",
+        "avocado"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "left facing page item; banner reads 'Florid(a)' across crops; first ingredient partially cut, legible '...y crab', transcribed as spicy crab"
+    }
+  ],
+  "partial_items_not_scored": [
+    {
+      "n": 16,
+      "name": null,
+      "section": null,
+      "price_text": "$15.95",
+      "price": 15.95,
+      "ingredients": [
+        "cream cheese",
+        "red onion",
+        "white tuna"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "left facing page partially in frame (overlaps special-rolls-1); name banner out of frame; ingredient list partially cut at photo edge, legible text '...m cheese, red onion, escolar'; escolar normalized to white tuna"
+    },
+    {
+      "n": 17,
+      "name": null,
+      "section": null,
+      "price_text": "$17.50",
+      "price": 17.5,
+      "ingredients": [
+        "chopped scallop",
+        "cucumber",
+        "salmon",
+        "smelt roe"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "left facing page item; name banner cut at photo edge, legible fragment 'g Mama'; printed 'masago' normalized to smelt roe"
+    },
+    {
+      "n": 19,
+      "name": null,
+      "section": null,
+      "price_text": "$19.99",
+      "price": 19.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "salmon"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "left facing page item; name banner cut at photo edge, legible fragments 'ble' and 'on Lover'; ingredients partially cut, legible '...b meat, avocado, ...mber, 8pcs salmon'"
+    }
+  ],
+  "partial_items_note": "Items cut off at the frame edge (overlap with special-rolls-1). Names are unreadable so they are excluded from scoring; kept here for Tom's review and future merge tests."
+}

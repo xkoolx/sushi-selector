@@ -1,0 +1,234 @@
+{
+  "restaurant_name": "KM Sushi",
+  "source_photos": [
+    "IMG_3442"
+  ],
+  "items": [
+    {
+      "n": 1,
+      "name": "Miso Soup",
+      "section": "Soup & Noodles",
+      "price_text": "2.95",
+      "price": 2.95,
+      "ingredients": [
+        "tofu",
+        "seaweed"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "menu code N1; japanese soy bean paste soup; menu says seaweed; seaweed kept as seaweed (wakame, not nori)"
+    },
+    {
+      "n": 2,
+      "name": "Chicken Udon",
+      "section": "Soup & Noodles",
+      "price_text": "13.99",
+      "price": 13.99,
+      "ingredients": [
+        "soy sauce broth",
+        "udon noodle",
+        "chicken"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "menu code N2; grilled chicken leg meat; menu says thick noodle"
+    },
+    {
+      "n": 3,
+      "name": "Vegetable Udon",
+      "section": "Soup & Noodles",
+      "price_text": "13.99",
+      "price": 13.99,
+      "ingredients": [
+        "soy sauce broth",
+        "udon noodle",
+        "vegetable"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "menu code N3; various vegetables; menu says thick noodle"
+    },
+    {
+      "n": 4,
+      "name": "Spicy Beef Udon",
+      "section": "Soup & Noodles",
+      "price_text": "14.95",
+      "price": 14.95,
+      "ingredients": [
+        "spicy beef",
+        "udon noodle"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "menu code N4; spicy sauteed beef in broth; menu says thick noodle"
+    },
+    {
+      "n": 5,
+      "name": "Tempura Udon",
+      "section": "Soup & Noodles",
+      "price_text": "16.50",
+      "price": 16.5,
+      "ingredients": [
+        "soy sauce broth",
+        "udon noodle",
+        "tempura shrimp",
+        "yam",
+        "zucchini",
+        "onion",
+        "green bean"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "menu code N5; mixed tempura: 2 shrimp, 1 yam, 1 zucchini, 1 yellow onion, 2 green bean; menu says thick noodle"
+    },
+    {
+      "n": 6,
+      "name": "Donkotsu Ramen",
+      "section": "Soup & Noodles",
+      "price_text": "16.50",
+      "price": 16.5,
+      "ingredients": [
+        "pork broth",
+        "chashu pork",
+        "boiled egg",
+        "ramen noodle"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "menu code N6; menu says cha-shu; donkotsu is the menu's spelling of tonkotsu"
+    },
+    {
+      "n": 7,
+      "name": "Spicy Seafood Ramen",
+      "section": "Soup & Noodles",
+      "price_text": "15.50",
+      "price": 15.5,
+      "ingredients": [
+        "seafood",
+        "green mussel",
+        "ramen noodle"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "menu code N7; spicy korean ramen; various seafood; 2 pcs green mussel"
+    },
+    {
+      "n": 8,
+      "name": "Yakisoba",
+      "section": "Soup & Noodles",
+      "price_text": "Chicken / Vegetable 14.45, Steak / Shrimp 15.45",
+      "price": null,
+      "ingredients": [
+        "yakisoba noodle",
+        "vegetable"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "menu code N8; stirred fried noodle; choice of meat: chicken, vegetable, steak, or shrimp; two printed prices, none picked"
+    },
+    {
+      "n": 9,
+      "name": "Children's Combo",
+      "section": "Children's Combo",
+      "price_text": "14.50",
+      "price": 14.5,
+      "ingredients": [],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "choose 2 items: chicken teriyaki, steak teriyaki, sesame chicken, mixed tempura, gyoza (4 pcs); combo box, no invented ingredient list"
+    },
+    {
+      "n": 10,
+      "name": "Chicken",
+      "section": "Katsu",
+      "price_text": "17.99",
+      "price": 17.99,
+      "ingredients": [
+        "chicken",
+        "katsu sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "deep fried panko breaded chicken tender meat; katsu dipping sauce; served w/ rice, soup and salad"
+    },
+    {
+      "n": 11,
+      "name": "Pork",
+      "section": "Katsu",
+      "price_text": "19.99",
+      "price": 19.99,
+      "ingredients": [
+        "pork",
+        "katsu sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "deep fried panko breaded pork tender loin meat; katsu dipping sauce; served w/ rice, soup and salad"
+    },
+    {
+      "n": 12,
+      "name": "Chicken Teriyaki",
+      "section": "Rice Bowl",
+      "price_text": "11.95",
+      "price": 11.95,
+      "ingredients": [
+        "chicken",
+        "green cabbage",
+        "teriyaki sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "grilled chicken leg meat; sauteed cabbage; over rice"
+    },
+    {
+      "n": 13,
+      "name": "Steak Teriyaki",
+      "section": "Rice Bowl",
+      "price_text": "13.99",
+      "price": 13.99,
+      "ingredients": [
+        "beef",
+        "green cabbage",
+        "teriyaki sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "grilled beef; sauteed cabbage; over rice"
+    },
+    {
+      "n": 14,
+      "name": "Sesame Chicken",
+      "section": "Rice Bowl",
+      "price_text": "12.95",
+      "price": 12.95,
+      "ingredients": [
+        "chicken",
+        "green cabbage",
+        "teriyaki sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "crispy deep fried chicken leg meat; sauteed cabbage; over rice; description prints no sesame"
+    },
+    {
+      "n": 15,
+      "name": "Mixed Tempura",
+      "section": "Rice Bowl",
+      "price_text": "12.99",
+      "price": 12.99,
+      "ingredients": [
+        "green cabbage",
+        "tempura shrimp",
+        "onion",
+        "yam",
+        "zucchini",
+        "green bean",
+        "teriyaki sauce",
+        "tempura sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "sauteed cabbage; deep fried 2 shrimp; vegetables: 1 onion, 1 yam, 1 zucchini, 2 green bean; tempura sauce on side; over rice"
+    }
+  ]
+}

@@ -64,13 +64,40 @@ system.md (T-1.3) so predictions and goldens align:
   "California Roll" with no description) are labeled from standard sushi
   knowledge. These are the labels most likely to need Tom's correction.
 
+## Convention decisions surfaced during drafting (for Tom)
+
+1. **Combo-priced entrees**: when a page prices entrees only through a
+   "Choose 2 Items" header, the header is one item carrying the printed
+   price and each entree is price null with a note. Rationale: the
+   extraction prompt forbids carrying a price over from a neighboring
+   line, so a golden that stamps the combo price on every entree would
+   fail a correct extractor. The lunch and dinner goldens both follow
+   this; overrule in both places at once if you disagree.
+2. **Aliases are context free at runtime**, so context sensitive entries
+   were removed from shared/aliases.json ("seaweed" to "nori" broke
+   seaweed salad, "egg" to "egg omelet" broke egg batter components).
+   Wrap-specific ("seaweed paper") and dish-specific ("tamago") aliases
+   remain.
+3. **Salad dressings and broths** are labeled as ingredients when
+   printed (house dressing, soy sauce broth). Confirm or strike.
+4. **is_raw and roe**: items whose only raw component is roe (salmon
+   skin salad with smelt roe) are labeled is_raw true. Confirm.
+5. **Printed rice**: "seasoned rice" printed as a named component of
+   chirashi bowls is listed, while assumed rice under nigiri and rolls
+   stays unlisted. Confirm the distinction.
+
 ## Status
 
-Drafted and ready for review (3 menus, ~101 items):
-`km-sushi-sashimi` (12), `km-sushi-nigiri` (41), `kuu-sushi-happy-hour` (48).
+All 11 menus drafted and awaiting Tom's review (~224 scored items):
+`km-sushi-sashimi` (12), `km-sushi-nigiri` (41), `kuu-sushi-happy-hour` (48),
+`km-sushi-cold-appetizer` (8), `km-sushi-hot-appetizer-salad` (18),
+`km-sushi-noodles-kitchen` (15), `km-sushi-lunch` (20), `km-sushi-dinner`
+(19), `km-sushi-special-rolls-1` (14), `km-sushi-special-rolls-2` (16 plus 3
+unreadable edge partials kept unscored), `km-sushi-special-rolls-3` (14).
 
-Organized, golden pending: the seven other KM pages. They have no `golden.json`
-yet, so the harness does not score them until drafted. The specialty-roll pages
-(`special-rolls-1/2/3`) print per-roll ingredients in fine text under glare on
-rotated photos; drafting those reliably needs a zoomed crop pass (or Tom's
-transcription), not a single-glance read, so they are held rather than guessed.
+The eight new drafts were produced with a zoomed crop pass (upright rotation,
+per-section 2x crops, contrast boost against glare) and hand-labeled item by
+item, never via the extraction pipeline. Each carries its own uncertainty in
+notes: INFERRED fillings, price uncertain (glare), verbatim menu spellings,
+and typos preserved as printed. Review priority: the notes-flagged entries
+and the five convention decisions above.

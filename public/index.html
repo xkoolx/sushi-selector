@@ -24,9 +24,14 @@
       </header>
 
       <section id="home" class="panel" aria-label="Capture">
-        <p class="placeholder">
-          Scaffold ready. Capture, parse, and results land in Phase 1 and 2.
-        </p>
+        <!-- Interim Phase 1 controls: enough to drive the pipeline end to
+             end in a browser. The real capture and results UI lands in
+             Phase 2 (T-2.1 through T-2.8). -->
+        <label class="capture-label" for="photo-input">Menu photos (up to 6)</label>
+        <input id="photo-input" type="file" accept="image/*" capture="environment" multiple />
+        <button id="parse-button" type="button" disabled>Parse menu</button>
+        <p id="status" class="placeholder" aria-live="polite"></p>
+        <ul id="results"></ul>
       </section>
     </main>
 

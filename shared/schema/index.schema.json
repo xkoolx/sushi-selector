@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sections", "items"],
+  "properties": {
+    "restaurant_name": { "type": ["string", "null"] },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": { "name": { "type": "string" } }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["n", "name", "section", "price_text", "price"],
+        "properties": {
+          "n": { "type": "integer", "description": "1-based reading-order index, stable across passes" },
+          "name": { "type": "string" },
+          "section": { "type": ["string", "null"] },
+          "price_text": { "type": ["string", "null"], "description": "verbatim price text, e.g. '14.95', 'MP', '8/15'" },
+          "price": { "type": ["number", "null"], "description": "parsed numeric price, null when ambiguous (market price, multi-size)" }
+        }
+      }
+    }
+  }
+}
