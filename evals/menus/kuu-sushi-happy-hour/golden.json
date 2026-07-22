@@ -1,63 +1,679 @@
 {
-  "restaurant_name": "KUU Sushi",
-  "source_photos": ["IMG_3439", "IMG_3438"],
+  "restaurant_name": "KUU SUSHI",
+  "source_photos": [
+    "IMG_3439",
+    "IMG_3438"
+  ],
   "notes": "Happy hour menu (Mon-Fri 3-5pm). Standalone beverages (sake, beer, cocktails) intentionally excluded from the golden; food and sushi only.",
   "items": [
-    { "n": 1, "name": "Tuna Carpaccio", "section": "H.H Carpaccio", "price_text": "8.99 (+1)", "price": 9.99, "ingredients": ["tuna", "yuzu dressing"], "wrap": "none", "is_raw": true, "notes": "4 pc; thinly sliced fresh fish, yuzu house dressing" },
-    { "n": 2, "name": "Yellowtail Carpaccio", "section": "H.H Carpaccio", "price_text": "8.99 (+0.50)", "price": 9.49, "ingredients": ["yellowtail", "yuzu dressing"], "wrap": "none", "is_raw": true, "notes": "4 pc" },
-    { "n": 3, "name": "Salmon Carpaccio", "section": "H.H Carpaccio", "price_text": "8.99", "price": 8.99, "ingredients": ["salmon", "yuzu dressing"], "wrap": "none", "is_raw": true, "notes": "4 pc" },
-
-    { "n": 4, "name": "Kuu Poke", "section": "H.H Bowl Special", "price_text": "8.99", "price": 8.99, "ingredients": ["tuna"], "wrap": "none", "is_raw": true, "notes": "+1 for spicy; fish not printed, INFERRED tuna poke" },
-    { "n": 5, "name": "Pork Katsu", "section": "H.H Bowl Special", "price_text": "9.99", "price": 9.99, "ingredients": ["pork"], "wrap": "none", "is_raw": false, "notes": "breaded, deep fried" },
-    { "n": 6, "name": "Yakisoba Chicken", "section": "H.H Bowl Special", "price_text": "7.99", "price": 7.99, "ingredients": ["chicken", "yakisoba noodle", "vegetable"], "wrap": "none", "is_raw": false },
-    { "n": 7, "name": "Teriyaki Chicken", "section": "H.H Bowl Special", "price_text": "6.99", "price": 6.99, "ingredients": ["chicken", "teriyaki sauce"], "wrap": "none", "is_raw": false },
-
-    { "n": 8, "name": "Sushi Sampler", "section": "H.H Sushi Sampler", "price_text": "10.95", "price": 10.95, "ingredients": ["tuna", "salmon", "yellowtail", "albacore", "red snapper"], "wrap": "none", "is_raw": true, "notes": "1 each; 1 substitution available" },
-
-    { "n": 9, "name": "Tuna", "section": "H.H Sashimi", "price_text": "6.95", "price": 6.95, "ingredients": ["tuna"], "wrap": "none", "is_raw": true, "notes": "3 pc" },
-    { "n": 10, "name": "Salmon", "section": "H.H Sashimi", "price_text": "5.99", "price": 5.99, "ingredients": ["salmon"], "wrap": "none", "is_raw": true, "notes": "3 pc" },
-    { "n": 11, "name": "Yellowtail", "section": "H.H Sashimi", "price_text": "6.75", "price": 6.75, "ingredients": ["yellowtail"], "wrap": "none", "is_raw": true, "notes": "3 pc" },
-    { "n": 12, "name": "Albacore", "section": "H.H Sashimi", "price_text": "5.95", "price": 5.95, "ingredients": ["albacore"], "wrap": "none", "is_raw": true, "notes": "3 pc" },
-    { "n": 13, "name": "Red Snapper", "section": "H.H Sashimi", "price_text": "6.45", "price": 6.45, "ingredients": ["red snapper"], "wrap": "none", "is_raw": true, "notes": "3 pc" },
-    { "n": 14, "name": "Seared Tuna", "section": "H.H Sashimi", "price_text": "6.99", "price": 6.99, "ingredients": ["seared tuna"], "wrap": "none", "is_raw": true, "notes": "3 pc" },
-
-    { "n": 15, "name": "Edamame", "section": "H.H Appetizers", "price_text": "2.99", "price": 2.99, "ingredients": ["soybean"], "wrap": "none", "is_raw": false },
-    { "n": 16, "name": "Garlic Edamame", "section": "H.H Appetizers", "price_text": "3.99", "price": 3.99, "ingredients": ["soybean", "garlic"], "wrap": "none", "is_raw": false },
-    { "n": 17, "name": "Spicy Edamame", "section": "H.H Appetizers", "price_text": "4.50", "price": 4.50, "ingredients": ["soybean", "chili"], "wrap": "none", "is_raw": false },
-    { "n": 18, "name": "Tofu Kushiyaki", "section": "H.H Appetizers", "price_text": "5.99", "price": 5.99, "ingredients": ["tofu"], "wrap": "none", "is_raw": false, "notes": "grilled skewer" },
-    { "n": 19, "name": "Pork Belly Kushiyaki", "section": "H.H Appetizers", "price_text": "9.50", "price": 9.50, "ingredients": ["pork belly"], "wrap": "none", "is_raw": false, "notes": "grilled skewer" },
-    { "n": 20, "name": "Ebi Katsu Ring", "section": "H.H Appetizers", "price_text": "6.75", "price": 6.75, "ingredients": ["shrimp"], "wrap": "none", "is_raw": false, "notes": "4 pc; breaded, fried" },
-    { "n": 21, "name": "Yellowtail Kama", "section": "H.H Appetizers", "price_text": "8.95", "price": 8.95, "ingredients": ["yellowtail collar"], "wrap": "none", "is_raw": false, "notes": "grilled" },
-    { "n": 22, "name": "Edamame Gyoza", "section": "H.H Appetizers", "price_text": "5.99", "price": 5.99, "ingredients": ["edamame"], "wrap": "none", "is_raw": false, "notes": "4 pc" },
-    { "n": 23, "name": "Japanese Sausage w/ Rice Cake", "section": "H.H Appetizers", "price_text": "4.99", "price": 4.99, "ingredients": ["sausage", "rice cake"], "wrap": "none", "is_raw": false },
-
-    { "n": 24, "name": "Creamy Salmon", "section": "H.H Tofu Pocket", "price_text": "3.99", "price": 3.99, "ingredients": ["salmon", "creamy sauce"], "wrap": "none", "is_raw": true, "notes": "salmon mixed with creamy sauce, in tofu pocket" },
-    { "n": 25, "name": "Buttery Eel", "section": "H.H Tofu Pocket", "price_text": "5.99", "price": 5.99, "ingredients": ["freshwater eel", "eel sauce"], "wrap": "none", "is_raw": false, "notes": "oven baked eel, in tofu pocket" },
-
-    { "n": 26, "name": "California + Spicy Tuna", "section": "H.H Basic Cut Roll", "price_text": "5.99", "price": 5.99, "ingredients": ["imitation crab", "avocado", "cucumber", "spicy tuna"], "wrap": "nori", "is_raw": true, "notes": "combo: 4 pc california + 4 pc spicy tuna" },
-    { "n": 27, "name": "California", "section": "H.H Basic Cut Roll", "price_text": "4.99", "price": 4.99, "ingredients": ["imitation crab", "avocado", "cucumber"], "wrap": "nori", "is_raw": false },
-    { "n": 28, "name": "Spicy Tuna", "section": "H.H Basic Cut Roll", "price_text": "5.95", "price": 5.95, "ingredients": ["spicy tuna"], "wrap": "nori", "is_raw": true },
-    { "n": 29, "name": "Philadephia", "section": "H.H Basic Cut Roll", "price_text": "6.50", "price": 6.50, "ingredients": ["salmon", "cream cheese", "cucumber"], "wrap": "nori", "is_raw": true, "notes": "menu spelling 'Philadephia'; INFERRED fillings" },
-    { "n": 30, "name": "Salmon", "section": "H.H Basic Cut Roll", "price_text": "5.95", "price": 5.95, "ingredients": ["salmon"], "wrap": "nori", "is_raw": true },
-    { "n": 31, "name": "Yellowtail", "section": "H.H Basic Cut Roll", "price_text": "5.95", "price": 5.95, "ingredients": ["yellowtail"], "wrap": "nori", "is_raw": true },
-    { "n": 32, "name": "Salmon Skin", "section": "H.H Basic Cut Roll", "price_text": "5.45", "price": 5.45, "ingredients": ["salmon skin", "cucumber"], "wrap": "nori", "is_raw": false, "notes": "INFERRED cucumber" },
-    { "n": 33, "name": "Avocado", "section": "H.H Basic Cut Roll", "price_text": "4.99", "price": 4.99, "ingredients": ["avocado"], "wrap": "nori", "is_raw": false },
-    { "n": 34, "name": "Vegetable", "section": "H.H Basic Cut Roll", "price_text": "4.95", "price": 4.95, "ingredients": ["avocado", "cucumber"], "wrap": "nori", "is_raw": false, "notes": "INFERRED fillings" },
-    { "n": 35, "name": "Cucumber", "section": "H.H Basic Cut Roll", "price_text": "4.75", "price": 4.75, "ingredients": ["cucumber"], "wrap": "nori", "is_raw": false },
-
-    { "n": 36, "name": "Tuna Belly", "section": "H.H Hand Roll", "price_text": "6.75", "price": 6.75, "ingredients": ["tuna belly"], "wrap": "nori", "is_raw": true },
-
-    { "n": 37, "name": "Popper", "section": "KUU H.H Special Roll", "price_text": "4.99", "price": 4.99, "ingredients": ["jalapeno", "cream cheese", "salmon"], "wrap": "none", "is_raw": false, "notes": "deep fried; jalapeno stuffed with cream cheese and chopped salmon" },
-    { "n": 38, "name": "2 Strikes", "section": "KUU H.H Special Roll", "price_text": "4.99", "price": 4.99, "ingredients": ["spicy tuna", "spicy crab", "seaweed salad"], "wrap": "none", "is_raw": false, "notes": "deep fried, panko breaded" },
-    { "n": 39, "name": "Veggie Tempura", "section": "KUU H.H Special Roll", "price_text": "7.99", "price": 7.99, "ingredients": ["zucchini", "yam", "green bean"], "wrap": "nori", "is_raw": false, "notes": "deep fried tempura roll" },
-    { "n": 40, "name": "Fujisan", "section": "KUU H.H Special Roll", "price_text": "10.99", "price": 10.99, "ingredients": ["jalapeno", "spicy tuna", "cream cheese", "escolar", "fried onion"], "wrap": "nori", "is_raw": true, "notes": "deep fried; escolar on top" },
-    { "n": 41, "name": "Hoseki", "section": "KUU H.H Special Roll", "price_text": "10.99", "price": 10.99, "ingredients": ["salmon", "avocado", "spicy tuna"], "wrap": "nori", "is_raw": true, "notes": "deep fried salmon inside, spicy tuna on top" },
-    { "n": 42, "name": "Baked Salmon", "section": "KUU H.H Special Roll", "price_text": "8.99", "price": 8.99, "ingredients": ["imitation crab", "avocado", "salmon"], "wrap": "nori", "is_raw": false, "notes": "oven baked" },
-    { "n": 43, "name": "Gyumori", "section": "KUU H.H Special Roll", "price_text": "12.99", "price": 12.99, "ingredients": ["imitation crab", "avocado", "cucumber", "steak", "vegetable"], "wrap": "nori", "is_raw": false, "notes": "sauteed steak and vegetables on top" },
-    { "n": 44, "name": "Kanji", "section": "KUU H.H Special Roll", "price_text": "11.99", "price": 11.99, "ingredients": ["avocado", "cucumber", "gobo", "albacore", "fried onion"], "wrap": "nori", "is_raw": true },
-    { "n": 45, "name": "Pacific", "section": "KUU H.H Special Roll", "price_text": "12.99", "price": 12.99, "ingredients": ["spicy crab", "cucumber", "seaweed salad", "tuna", "escolar", "avocado"], "wrap": "nori", "is_raw": true },
-    { "n": 46, "name": "Kogane", "section": "KUU H.H Special Roll", "price_text": "9.99", "price": 9.99, "ingredients": ["imitation crab", "cream cheese", "mango", "avocado"], "wrap": "nori", "is_raw": false },
-    { "n": 47, "name": "Predator", "section": "KUU H.H Special Roll", "price_text": "11.99", "price": 11.99, "ingredients": ["spicy crab", "gobo", "cucumber", "cilantro", "fried onion", "yellowtail"], "wrap": "nori", "is_raw": true },
-    { "n": 48, "name": "Crunch", "section": "KUU H.H Special Roll", "price_text": "9.99", "price": 9.99, "ingredients": ["imitation crab", "avocado", "cucumber", "shrimp tempura"], "wrap": "nori", "is_raw": false }
+    {
+      "n": 1,
+      "name": "Tuna Carpaccio",
+      "section": "H.H Carpaccio",
+      "price_text": "8.99 (+1)",
+      "price": 9.99,
+      "ingredients": [
+        "tuna",
+        "yuzu dressing"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "4 pc; thinly sliced fresh fish, yuzu house dressing"
+    },
+    {
+      "n": 2,
+      "name": "Yellowtail Carpaccio",
+      "section": "H.H Carpaccio",
+      "price_text": "8.99 (+0.50)",
+      "price": 9.49,
+      "ingredients": [
+        "yellowtail",
+        "yuzu dressing"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "4 pc; thinly sliced fresh fish, yuzu house dressing"
+    },
+    {
+      "n": 3,
+      "name": "Salmon Carpaccio",
+      "section": "H.H Carpaccio",
+      "price_text": "8.99",
+      "price": 8.99,
+      "ingredients": [
+        "salmon",
+        "yuzu dressing"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "4 pc; thinly sliced fresh fish, yuzu house dressing"
+    },
+    {
+      "n": 4,
+      "name": "Kuu Poke",
+      "section": "H.H Bowl Special",
+      "price_text": "8.99",
+      "price": 8.99,
+      "ingredients": [
+        "tuna"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "+1 for spicy; fish not printed, INFERRED tuna poke"
+    },
+    {
+      "n": 5,
+      "name": "Pork Katsu",
+      "section": "H.H Bowl Special",
+      "price_text": "9.99",
+      "price": 9.99,
+      "ingredients": [
+        "pork"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "INFERRED ingredients; breaded, deep fried"
+    },
+    {
+      "n": 6,
+      "name": "Yakisoba Chicken",
+      "section": "H.H Bowl Special",
+      "price_text": "7.99",
+      "price": 7.99,
+      "ingredients": [
+        "chicken",
+        "yakisoba noodle"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "INFERRED ingredients; various vegetables not itemized"
+    },
+    {
+      "n": 7,
+      "name": "Teriyaki Chicken",
+      "section": "H.H Bowl Special",
+      "price_text": "6.99",
+      "price": 6.99,
+      "ingredients": [
+        "chicken",
+        "teriyaki sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "INFERRED ingredients"
+    },
+    {
+      "n": 8,
+      "name": "Sushi Sampler",
+      "section": "H.H Sushi Sampler",
+      "price_text": "10.95",
+      "price": 10.95,
+      "ingredients": [
+        "tuna",
+        "salmon",
+        "yellowtail",
+        "albacore",
+        "red snapper"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "1 each; 1 substitution available"
+    },
+    {
+      "n": 9,
+      "name": "Tuna",
+      "section": "H.H Sashimi",
+      "price_text": "6.95",
+      "price": 6.95,
+      "ingredients": [
+        "tuna"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "3 pc"
+    },
+    {
+      "n": 10,
+      "name": "Salmon",
+      "section": "H.H Sashimi",
+      "price_text": "5.99",
+      "price": 5.99,
+      "ingredients": [
+        "salmon"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "3 pc"
+    },
+    {
+      "n": 11,
+      "name": "Yellowtail",
+      "section": "H.H Sashimi",
+      "price_text": "6.75",
+      "price": 6.75,
+      "ingredients": [
+        "yellowtail"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "3 pc"
+    },
+    {
+      "n": 12,
+      "name": "Albacore",
+      "section": "H.H Sashimi",
+      "price_text": "5.95",
+      "price": 5.95,
+      "ingredients": [
+        "albacore"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "3 pc"
+    },
+    {
+      "n": 13,
+      "name": "Red Snapper",
+      "section": "H.H Sashimi",
+      "price_text": "6.45",
+      "price": 6.45,
+      "ingredients": [
+        "red snapper"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "3 pc"
+    },
+    {
+      "n": 14,
+      "name": "Seared Tuna",
+      "section": "H.H Sashimi",
+      "price_text": "6.99",
+      "price": 6.99,
+      "ingredients": [
+        "seared tuna"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "3 pc"
+    },
+    {
+      "n": 15,
+      "name": "Edamame",
+      "section": "H.H Appetizers",
+      "price_text": "2.99",
+      "price": 2.99,
+      "ingredients": [
+        "soybean"
+      ],
+      "wrap": "none",
+      "is_raw": false
+    },
+    {
+      "n": 16,
+      "name": "Garlic Edamame",
+      "section": "H.H Appetizers",
+      "price_text": "3.99",
+      "price": 3.99,
+      "ingredients": [
+        "soybean",
+        "garlic"
+      ],
+      "wrap": "none",
+      "is_raw": false
+    },
+    {
+      "n": 17,
+      "name": "Spicy Edamame",
+      "section": "H.H Appetizers",
+      "price_text": "4.50",
+      "price": 4.5,
+      "ingredients": [
+        "soybean",
+        "chili"
+      ],
+      "wrap": "none",
+      "is_raw": false
+    },
+    {
+      "n": 18,
+      "name": "Tofu Kushiyaki",
+      "section": "H.H Appetizers",
+      "price_text": "5.99",
+      "price": 5.99,
+      "ingredients": [
+        "tofu"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "grilled skewer"
+    },
+    {
+      "n": 19,
+      "name": "Pork Belly Kushiyaki",
+      "section": "H.H Appetizers",
+      "price_text": "9.50",
+      "price": 9.5,
+      "ingredients": [
+        "pork belly"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "grilled skewer"
+    },
+    {
+      "n": 20,
+      "name": "Ebi Katsu Ring",
+      "section": "H.H Appetizers",
+      "price_text": "6.75",
+      "price": 6.75,
+      "ingredients": [
+        "shrimp"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "4 pc; breaded, fried"
+    },
+    {
+      "n": 21,
+      "name": "Yellowtail Kama",
+      "section": "H.H Appetizers",
+      "price_text": "8.95",
+      "price": 8.95,
+      "ingredients": [
+        "yellowtail collar"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "grilled"
+    },
+    {
+      "n": 22,
+      "name": "Edamame Gyoza",
+      "section": "H.H Appetizers",
+      "price_text": "5.99",
+      "price": 5.99,
+      "ingredients": [
+        "edamame"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "4 pc"
+    },
+    {
+      "n": 23,
+      "name": "Japanese Sausage w/ Rice Cake",
+      "section": "H.H Appetizers",
+      "price_text": "4.99",
+      "price": 4.99,
+      "ingredients": [
+        "sausage",
+        "rice cake"
+      ],
+      "wrap": "none",
+      "is_raw": false
+    },
+    {
+      "n": 24,
+      "name": "Creamy Salmon",
+      "section": "H.H Tofu Pocket",
+      "price_text": "3.99",
+      "price": 3.99,
+      "ingredients": [
+        "salmon",
+        "creamy sauce"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "salmon mixed with creamy sauce, in tofu pocket"
+    },
+    {
+      "n": 25,
+      "name": "Buttery Eel",
+      "section": "H.H Tofu Pocket",
+      "price_text": "5.99",
+      "price": 5.99,
+      "ingredients": [
+        "freshwater eel",
+        "eel sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "oven baked eel, in tofu pocket"
+    },
+    {
+      "n": 26,
+      "name": "California + Spicy Tuna",
+      "section": "H.H Basic Cut Roll",
+      "price_text": "5.99",
+      "price": 5.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "spicy tuna"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "combo: 4 pc california + 4 pc spicy tuna; INFERRED ingredients"
+    },
+    {
+      "n": 27,
+      "name": "California",
+      "section": "H.H Basic Cut Roll",
+      "price_text": "4.99",
+      "price": 4.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "INFERRED ingredients"
+    },
+    {
+      "n": 28,
+      "name": "Spicy Tuna",
+      "section": "H.H Basic Cut Roll",
+      "price_text": "5.95",
+      "price": 5.95,
+      "ingredients": [
+        "spicy tuna"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 29,
+      "name": "Philadephia",
+      "section": "H.H Basic Cut Roll",
+      "price_text": "6.50",
+      "price": 6.5,
+      "ingredients": [
+        "salmon",
+        "cream cheese",
+        "cucumber"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "menu spelling 'Philadephia'; INFERRED ingredients"
+    },
+    {
+      "n": 30,
+      "name": "Salmon",
+      "section": "H.H Basic Cut Roll",
+      "price_text": "5.95",
+      "price": 5.95,
+      "ingredients": [
+        "salmon"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 31,
+      "name": "Yellowtail",
+      "section": "H.H Basic Cut Roll",
+      "price_text": "5.95",
+      "price": 5.95,
+      "ingredients": [
+        "yellowtail"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 32,
+      "name": "Salmon Skin",
+      "section": "H.H Basic Cut Roll",
+      "price_text": "5.45",
+      "price": 5.45,
+      "ingredients": [
+        "salmon skin",
+        "cucumber"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "INFERRED cucumber"
+    },
+    {
+      "n": 33,
+      "name": "Avocado",
+      "section": "H.H Basic Cut Roll",
+      "price_text": "4.99",
+      "price": 4.99,
+      "ingredients": [
+        "avocado"
+      ],
+      "wrap": "nori",
+      "is_raw": false
+    },
+    {
+      "n": 34,
+      "name": "Vegetable",
+      "section": "H.H Basic Cut Roll",
+      "price_text": "4.95",
+      "price": 4.95,
+      "ingredients": [
+        "avocado",
+        "cucumber"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "INFERRED ingredients"
+    },
+    {
+      "n": 35,
+      "name": "Cucumber",
+      "section": "H.H Basic Cut Roll",
+      "price_text": "4.75",
+      "price": 4.75,
+      "ingredients": [
+        "cucumber"
+      ],
+      "wrap": "nori",
+      "is_raw": false
+    },
+    {
+      "n": 36,
+      "name": "Tuna Belly",
+      "section": "H.H Hand Roll",
+      "price_text": "6.75",
+      "price": 6.75,
+      "ingredients": [
+        "tuna belly"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 37,
+      "name": "Popper",
+      "section": "KUU H.H Special Roll",
+      "price_text": "4.99",
+      "price": 4.99,
+      "ingredients": [
+        "jalapeno",
+        "cream cheese",
+        "salmon"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "deep fried; jalapeno stuffed with cream cheese and chopped salmon"
+    },
+    {
+      "n": 38,
+      "name": "2 Strikes",
+      "section": "KUU H.H Special Roll",
+      "price_text": "4.99",
+      "price": 4.99,
+      "ingredients": [
+        "spicy tuna",
+        "spicy crab",
+        "seaweed salad"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "deep fried, panko breaded"
+    },
+    {
+      "n": 39,
+      "name": "Veggie Tempura",
+      "section": "KUU H.H Special Roll",
+      "price_text": "7.99",
+      "price": 7.99,
+      "ingredients": [
+        "zucchini",
+        "yam",
+        "green bean"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "deep fried tempura roll"
+    },
+    {
+      "n": 40,
+      "name": "Fujisan",
+      "section": "KUU H.H Special Roll",
+      "price_text": "10.99",
+      "price": 10.99,
+      "ingredients": [
+        "jalapeno",
+        "spicy tuna",
+        "cream cheese",
+        "escolar",
+        "fried onion"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "deep fried; escolar on top"
+    },
+    {
+      "n": 41,
+      "name": "Hoseki",
+      "section": "KUU H.H Special Roll",
+      "price_text": "10.99",
+      "price": 10.99,
+      "ingredients": [
+        "salmon",
+        "avocado",
+        "spicy tuna"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "deep fried salmon inside, spicy tuna on top"
+    },
+    {
+      "n": 42,
+      "name": "Baked Salmon",
+      "section": "KUU H.H Special Roll",
+      "price_text": "8.99",
+      "price": 8.99,
+      "ingredients": [
+        "crab",
+        "avocado",
+        "salmon"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "oven baked"
+    },
+    {
+      "n": 43,
+      "name": "Gyumori",
+      "section": "KUU H.H Special Roll",
+      "price_text": "12.99",
+      "price": 12.99,
+      "ingredients": [
+        "crab",
+        "avocado",
+        "cucumber",
+        "steak"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "sauteed steak and vegetables on top; various vegetables not itemized"
+    },
+    {
+      "n": 44,
+      "name": "Kanji",
+      "section": "KUU H.H Special Roll",
+      "price_text": "11.99",
+      "price": 11.99,
+      "ingredients": [
+        "avocado",
+        "cucumber",
+        "gobo",
+        "albacore",
+        "fried onion"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 45,
+      "name": "Pacific",
+      "section": "KUU H.H Special Roll",
+      "price_text": "12.99",
+      "price": 12.99,
+      "ingredients": [
+        "spicy crab",
+        "cucumber",
+        "seaweed salad",
+        "tuna",
+        "escolar",
+        "avocado"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 46,
+      "name": "Kogane",
+      "section": "KUU H.H Special Roll",
+      "price_text": "9.99",
+      "price": 9.99,
+      "ingredients": [
+        "crab",
+        "cream cheese",
+        "mango",
+        "avocado"
+      ],
+      "wrap": "nori",
+      "is_raw": false
+    },
+    {
+      "n": 47,
+      "name": "Predator",
+      "section": "KUU H.H Special Roll",
+      "price_text": "11.99",
+      "price": 11.99,
+      "ingredients": [
+        "spicy crab",
+        "gobo",
+        "cucumber",
+        "cilantro",
+        "fried onion",
+        "yellowtail"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 48,
+      "name": "Crunch",
+      "section": "KUU H.H Special Roll",
+      "price_text": "9.99",
+      "price": 9.99,
+      "ingredients": [
+        "crab",
+        "avocado",
+        "cucumber",
+        "shrimp tempura"
+      ],
+      "wrap": "nori",
+      "is_raw": false
+    }
   ]
 }

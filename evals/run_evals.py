@@ -866,7 +866,7 @@ def cmd_check() -> int:
     raw = MENUS_DIR / "raw"
     if raw.exists():
         raw_imgs = [p for p in raw.iterdir() if p.suffix.lower() in {".jpg", ".jpeg", ".png"}]
-        print(f"raw drop folder: {len(raw_imgs)} unsorted photo(s) awaiting T-1.10 organization")
+        print(f"raw drop folder: {len(raw_imgs)} original photo(s) kept as provenance (organized into menus)")
 
     key_present = bool(os.environ.get("ANTHROPIC_API_KEY"))
     print(f"ANTHROPIC_API_KEY in env: {'yes' if key_present else 'no'}")

@@ -1,0 +1,720 @@
+{
+  "restaurant_name": "KUU SUSHI",
+  "source_photos": [
+    "IMG_3435",
+    "IMG_3436",
+    "IMG_3437"
+  ],
+  "notes": "Merged 3-photo specialty-roll menu (KUU SUSHI logo printed on every page). The three photos are adjacent fold-out pages: each roll appears fully on exactly one page, with only edge-bleed of neighbors, so this golden is the union of 43 unique rolls (no true duplicates). Section is coarse-grained ('Specialty Roll' / 'Vegetarian') since the fine banner categories (baked/fresh/tempura/fried/no-rice) are hard to assign per item and are not gated. Ingredient lists were transcribed from zoomed crops; items marked LOW/MED confidence in notes (a few 3436 name-to-ingredient alignments were ambiguous under glare) need Tom's careful review. smelt roe normalized to masago.",
+  "items": [
+    {
+      "n": 1,
+      "name": "Snow",
+      "section": "Specialty Roll",
+      "price_text": "15.95",
+      "price": 15.95,
+      "ingredients": [
+        "cream cheese",
+        "red onion",
+        "escolar"
+      ],
+      "wrap": "nori",
+      "is_raw": false
+    },
+    {
+      "n": 2,
+      "name": "Salmon Baked",
+      "section": "Specialty Roll",
+      "price_text": "15.95",
+      "price": 15.95,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "salmon",
+        "mayo"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "baked with mayo sauce"
+    },
+    {
+      "n": 3,
+      "name": "Dynamite",
+      "section": "Specialty Roll",
+      "price_text": "18.50",
+      "price": 18.5,
+      "ingredients": [
+        "bay scallop",
+        "mozzarella",
+        "crab meat",
+        "avocado",
+        "cucumber"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "bay scallop sauteed with vegetables and mozzarella, served over california roll; INFERRED ingredients; various vegetables not itemized"
+    },
+    {
+      "n": 4,
+      "name": "Volcano",
+      "section": "Specialty Roll",
+      "price_text": "18.99",
+      "price": 18.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "spicy tuna",
+        "salmon",
+        "mayo"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "baked with mayo sauce"
+    },
+    {
+      "n": 5,
+      "name": "Baby Lobster",
+      "section": "Specialty Roll",
+      "price_text": "18.99",
+      "price": 18.99,
+      "ingredients": [
+        "langostino",
+        "mozzarella",
+        "crab meat",
+        "avocado",
+        "cucumber"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "langostino sauteed with vegetables and mozzarella, served over california roll; INFERRED ingredients; various vegetables not itemized"
+    },
+    {
+      "n": 6,
+      "name": "Big Mama",
+      "section": "Specialty Roll",
+      "price_text": "17.50",
+      "price": 17.5,
+      "ingredients": [
+        "scallop",
+        "cucumber",
+        "salmon",
+        "masago"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 7,
+      "name": "Florida",
+      "section": "Specialty Roll",
+      "price_text": "16.99",
+      "price": 16.99,
+      "ingredients": [
+        "spicy crab",
+        "cream cheese",
+        "cilantro",
+        "salmon",
+        "avocado"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 8,
+      "name": "Double Salmon Lover",
+      "section": "Specialty Roll",
+      "price_text": "19.99",
+      "price": 19.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "salmon"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "8 pcs salmon"
+    },
+    {
+      "n": 9,
+      "name": "Double Rainbow",
+      "section": "Specialty Roll",
+      "price_text": "20.95",
+      "price": 20.95,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "tuna",
+        "salmon",
+        "shrimp",
+        "albacore",
+        "escolar"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 10,
+      "name": "Jon's Special",
+      "section": "Specialty Roll",
+      "price_text": "18.95",
+      "price": 18.95,
+      "ingredients": [
+        "spicy tuna",
+        "cilantro",
+        "avocado",
+        "cucumber",
+        "jalapeno",
+        "seared pepper salmon"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 11,
+      "name": "Salmon Lover",
+      "section": "Specialty Roll",
+      "price_text": "16.99",
+      "price": 16.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "salmon"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 12,
+      "name": "Rainbow",
+      "section": "Specialty Roll",
+      "price_text": "17.99",
+      "price": 17.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "tuna",
+        "salmon",
+        "albacore",
+        "escolar",
+        "shrimp"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 13,
+      "name": "911",
+      "section": "Specialty Roll",
+      "price_text": "17.99",
+      "price": 17.99,
+      "ingredients": [
+        "spicy tuna",
+        "cucumber",
+        "tuna",
+        "house spicy sauce"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 14,
+      "name": "Marine Boy",
+      "section": "Specialty Roll",
+      "price_text": "16.50",
+      "price": 16.5,
+      "ingredients": [
+        "spicy tuna",
+        "cucumber",
+        "avocado",
+        "salmon"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 15,
+      "name": "Garlic Albacore",
+      "section": "Specialty Roll",
+      "price_text": "15.99",
+      "price": 15.99,
+      "ingredients": [
+        "spicy tuna",
+        "cucumber",
+        "albacore",
+        "fried garlic"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 16,
+      "name": "Ventura",
+      "section": "Specialty Roll",
+      "price_text": "16.75",
+      "price": 16.75,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "cream cheese",
+        "stick crab",
+        "potato crunch"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 17,
+      "name": "Vegas",
+      "section": "Specialty Roll",
+      "price_text": "17.99",
+      "price": 17.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "spicy tuna",
+        "feep fried eel"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 18,
+      "name": "Jessica",
+      "section": "Specialty Roll",
+      "price_text": "17.99",
+      "price": 17.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "shrimp tempura",
+        "asparagus",
+        "tuna",
+        "salmon"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 19,
+      "name": "Kick",
+      "section": "Specialty Roll",
+      "price_text": "17.95",
+      "price": 17.95,
+      "ingredients": [
+        "spicy tuna",
+        "avocado",
+        "jalapeno",
+        "shrimp tempura",
+        "yellowtail",
+        "starched red onion"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 20,
+      "name": "Yellowtail Lover",
+      "section": "Specialty Roll",
+      "price_text": "17.50",
+      "price": 17.5,
+      "ingredients": [
+        "spicy tuna",
+        "cucumber",
+        "cilantro",
+        "jalapeno",
+        "yellowtail"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 21,
+      "name": "Sunrise",
+      "section": "Specialty Roll",
+      "price_text": "16.99",
+      "price": 16.99,
+      "ingredients": [
+        "spicy tuna",
+        "avocado",
+        "cucumber",
+        "garlic paste",
+        "seared tuna"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 22,
+      "name": "Mexican",
+      "section": "Specialty Roll",
+      "price_text": "14.99",
+      "price": 14.99,
+      "ingredients": [
+        "spicy crab",
+        "avocado",
+        "cilantro",
+        "pickled jalapeno",
+        "tempura crunch",
+        "potato crunch"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 23,
+      "name": "Chaos",
+      "section": "Specialty Roll",
+      "price_text": "17.99",
+      "price": 17.99,
+      "ingredients": [
+        "spicy crab",
+        "avocado",
+        "jalapeno",
+        "cilantro",
+        "seaweed salad",
+        "albacore",
+        "garlic paste",
+        "sesame oil",
+        "sliced lemon"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "MED confidence; lemon slices confirmed in photo"
+    },
+    {
+      "n": 24,
+      "name": "BBQ",
+      "section": "Specialty Roll",
+      "price_text": "18.95",
+      "price": 18.95,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "beef short rib"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "marinated beef short rib"
+    },
+    {
+      "n": 25,
+      "name": "Caterpillar",
+      "section": "Specialty Roll",
+      "price_text": "16.75",
+      "price": 16.75,
+      "ingredients": [
+        "crab meat",
+        "cucumber",
+        "freshwater eel",
+        "avocado"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 26,
+      "name": "Rainbow Spider",
+      "section": "Specialty Roll",
+      "price_text": "18.99",
+      "price": 18.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "soft shell crab",
+        "tuna",
+        "salmon",
+        "albacore",
+        "escolar",
+        "shrimp",
+        "masago",
+        "black tobiko"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "deep fried soft shell crab inside"
+    },
+    {
+      "n": 27,
+      "name": "Spider",
+      "section": "Specialty Roll",
+      "price_text": "14.99",
+      "price": 14.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "soft shell crab",
+        "masago"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "deep fried soft shell crab"
+    },
+    {
+      "n": 28,
+      "name": "Crunch",
+      "section": "Specialty Roll",
+      "price_text": "15.99",
+      "price": 15.99,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "shrimp tempura",
+        "tempura crunch",
+        "potato crunch"
+      ],
+      "wrap": "nori",
+      "is_raw": false
+    },
+    {
+      "n": 29,
+      "name": "Casanova",
+      "section": "Specialty Roll",
+      "price_text": "17.75",
+      "price": 17.75,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "shrimp tempura",
+        "salmon",
+        "tempura crunch"
+      ],
+      "wrap": "nori",
+      "is_raw": true
+    },
+    {
+      "n": 30,
+      "name": "Hikari",
+      "section": "Vegetarian",
+      "price_text": "13.95",
+      "price": 13.95,
+      "ingredients": [
+        "tofu",
+        "red radish",
+        "avocado",
+        "seaweed salad"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "deep fried tofu and rice mix"
+    },
+    {
+      "n": 31,
+      "name": "Midori",
+      "section": "Vegetarian",
+      "price_text": "14.95",
+      "price": 14.95,
+      "ingredients": [
+        "avocado",
+        "cucumber",
+        "tofu",
+        "potato crunch"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "deep fried tofu"
+    },
+    {
+      "n": 32,
+      "name": "Secret Garden",
+      "section": "Vegetarian",
+      "price_text": "13.95",
+      "price": 13.95,
+      "ingredients": [
+        "spring mix",
+        "vegan ham",
+        "bean curd",
+        "gobo"
+      ],
+      "wrap": "rice_paper",
+      "is_raw": false
+    },
+    {
+      "n": 33,
+      "name": "Tiffany",
+      "section": "Specialty Roll",
+      "price_text": "14.95",
+      "price": 14.95,
+      "ingredients": [
+        "spicy tuna",
+        "radish sprout",
+        "yellowtail",
+        "garlic",
+        "jalapeno"
+      ],
+      "wrap": "yellowtail",
+      "is_raw": true,
+      "notes": "wrapped with yellowtail (no nori); no rice; fried garlic"
+    },
+    {
+      "n": 34,
+      "name": "Migrane",
+      "section": "Specialty Roll",
+      "price_text": "17.75",
+      "price": 17.75,
+      "ingredients": [
+        "spicy crab",
+        "avocado",
+        "cucumber",
+        "shrimp tempura",
+        "salmon",
+        "escolar",
+        "jalapeno"
+      ],
+      "wrap": "nori",
+      "is_raw": true,
+      "notes": "fried jalapeno"
+    },
+    {
+      "n": 35,
+      "name": "Crunch Lover",
+      "section": "Specialty Roll",
+      "price_text": "16.95",
+      "price": 16.95,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "shrimp tempura",
+        "crispy crunch"
+      ],
+      "wrap": "soy_paper",
+      "is_raw": false
+    },
+    {
+      "n": 36,
+      "name": "Hot",
+      "section": "Specialty Roll",
+      "price_text": "13.95",
+      "price": 13.95,
+      "ingredients": [
+        "spicy tuna",
+        "jalapeno",
+        "cream cheese"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "pickled jalapeno; deep fried roll"
+    },
+    {
+      "n": 37,
+      "name": "Deep Fried California",
+      "section": "Specialty Roll",
+      "price_text": "14.50",
+      "price": 14.5,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "seaweed"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "deep fried; menu text: crab meat, avocado, deep fried seaweed"
+    },
+    {
+      "n": 38,
+      "name": "OMG",
+      "section": "Specialty Roll",
+      "price_text": "16.99",
+      "price": 16.99,
+      "ingredients": [
+        "spicy crab",
+        "avocado",
+        "shrimp tempura",
+        "salmon"
+      ],
+      "wrap": "salmon",
+      "is_raw": true,
+      "notes": "wrapped with salmon (no nori); no rice"
+    },
+    {
+      "n": 39,
+      "name": "Green Dragon",
+      "section": "Specialty Roll",
+      "price_text": "17.75",
+      "price": 17.75,
+      "ingredients": [
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "shrimp tempura",
+        "freshwater eel"
+      ],
+      "wrap": "nori",
+      "is_raw": false
+    },
+    {
+      "n": 40,
+      "name": "Crispy Rice Cake",
+      "section": "Specialty Roll",
+      "price_text": "12.99",
+      "price": 12.99,
+      "ingredients": [
+        "spicy tuna"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "spicy tuna on top of deep fried sushi rice ball, 4 pcs"
+    },
+    {
+      "n": 41,
+      "name": "Crazy Horse",
+      "section": "Specialty Roll",
+      "price_text": "12.99",
+      "price": 12.99,
+      "ingredients": [
+        "spicy salmon",
+        "avocado",
+        "cream cheese"
+      ],
+      "wrap": "nori",
+      "is_raw": false,
+      "notes": "chopped spicy salmon; deep fried roll"
+    },
+    {
+      "n": 42,
+      "name": "Avocado Bomb",
+      "section": "Specialty Roll",
+      "price_text": "14.99",
+      "price": 14.99,
+      "ingredients": [
+        "avocado",
+        "spicy tuna",
+        "crab meat",
+        "cream cheese"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "deep fried avocado stuffed with spicy tuna, crab, cream cheese"
+    },
+    {
+      "n": 43,
+      "name": "House Cucumber",
+      "section": "Specialty Roll",
+      "price_text": "17.99",
+      "price": 17.99,
+      "ingredients": [
+        "tuna",
+        "salmon",
+        "yellowtail",
+        "avocado",
+        "crab meat",
+        "cucumber"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "wrapped with cucumber, no rice"
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 {
-  "restaurant_name": "KM Sushi",
+  "restaurant_name": "KUU SUSHI",
   "source_photos": [
     "IMG_3444"
   ],
+  "notes": "Restaurant name printed (KUU SUSHI logo on page). Dinner entrees D1-D15 are choose-2-for-23.00 options, so each carries price null with price_text noting the combo price and any upcharge. smelt roe normalized to masago, tamago to egg.",
   "items": [
     {
       "n": 1,
@@ -10,13 +11,10 @@
       "section": "Dinner Special",
       "price_text": "26.99",
       "price": 26.99,
-      "ingredients": [
-        "assorted sashimi",
-        "seasoned rice"
-      ],
+      "ingredients": [],
       "wrap": "none",
       "is_raw": true,
-      "notes": "8 kinds of assorted sashimi; served with soup and salad"
+      "notes": "8 kinds assorted sashimi over seasoned rice; fish not itemized"
     },
     {
       "n": 2,
@@ -30,14 +28,18 @@
         "yellowtail",
         "albacore",
         "seared tuna",
-        "white tuna",
+        "escolar",
         "shrimp",
-        "smelt roe",
-        "egg omelet"
+        "masago",
+        "tamago",
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "spicy tuna"
       ],
       "wrap": "none",
       "is_raw": true,
-      "notes": "9 pcs nigiri plus choice of california roll or spicy tuna roll; menu says Escolar, Masago, Tamago; served with soup and salad"
+      "notes": "plus california roll or spicy tuna roll; smelt roe=masago, tamago=egg; INFERRED roll ingredients included"
     },
     {
       "n": 3,
@@ -50,157 +52,143 @@
         "salmon",
         "yellowtail",
         "albacore",
-        "shrimp"
+        "shrimp",
+        "crab meat",
+        "avocado",
+        "cucumber",
+        "spicy tuna"
       ],
       "wrap": "none",
       "is_raw": true,
-      "notes": "sushi: tuna, salmon, yellowtail, albacore, shrimp; sashimi: 2 tuna, 2 salmon, 2 albacore; plus choice of california roll or spicy tuna roll; served with soup and salad"
+      "notes": "sushi 1 tuna, 1 salmon, 1 yellowtail, 1 albacore, 1 shrimp; sashimi 2 tuna, 2 salmon, 2 albacore; plus california roll or spicy tuna roll; INFERRED roll ingredients included"
     },
     {
       "n": 4,
-      "name": "Choose 2 Items",
+      "name": "Chicken Teriyaki",
       "section": "Dinner Entree",
-      "price_text": "23.00",
-      "price": 23.0,
-      "ingredients": [],
+      "price_text": "2 for 23.00",
+      "price": null,
+      "ingredients": [
+        "chicken"
+      ],
       "wrap": "none",
-      "is_raw": null,
-      "notes": "combination header, pick any 2 dinner entree items; mirrors the lunch golden's modeling"
+      "is_raw": false,
+      "notes": "D1; grilled chicken breast meat"
     },
     {
       "n": 5,
-      "name": "Chicken Teriyaki",
-      "section": "Dinner Entree",
-      "price_text": null,
-      "price": null,
-      "ingredients": [
-        "chicken",
-        "teriyaki sauce"
-      ],
-      "wrap": "none",
-      "is_raw": false,
-      "notes": "menu code D1; grilled chicken breast meat; choose 2 items for 23.00, served with rice, soup and salad"
-    },
-    {
-      "n": 6,
       "name": "Steak Teriyaki",
       "section": "Dinner Entree",
-      "price_text": null,
-      "price": null,
-      "ingredients": [
-        "beef",
-        "teriyaki sauce"
-      ],
-      "wrap": "none",
-      "is_raw": false,
-      "notes": "menu code D2; menu says (ADD$1); grilled prime grade beef; choose 2 items for 23.00, served with rice, soup and salad"
-    },
-    {
-      "n": 7,
-      "name": "Salmon Teriyaki",
-      "section": "Dinner Entree",
-      "price_text": null,
-      "price": null,
-      "ingredients": [
-        "salmon",
-        "teriyaki sauce"
-      ],
-      "wrap": "none",
-      "is_raw": false,
-      "notes": "menu code D3; menu says (ADD$2); grilled salmon fillet, cooked; choose 2 items for 23.00, served with rice, soup and salad"
-    },
-    {
-      "n": 8,
-      "name": "Garlic Chicken",
-      "section": "Dinner Entree",
-      "price_text": null,
-      "price": null,
-      "ingredients": [
-        "chicken",
-        "garlic sauce",
-        "vegetable"
-      ],
-      "wrap": "none",
-      "is_raw": false,
-      "notes": "menu code D4; grilled chicken breast, sauteed; menu says Various Vegetables; choose 2 items for 23.00, served with rice, soup and salad"
-    },
-    {
-      "n": 9,
-      "name": "Spicy Chicken",
-      "section": "Dinner Entree",
-      "price_text": null,
-      "price": null,
-      "ingredients": [
-        "chicken",
-        "spicy sauce",
-        "vegetable"
-      ],
-      "wrap": "none",
-      "is_raw": false,
-      "notes": "menu code D5; grilled chicken breast, sauteed; menu says Various Vegetables; choose 2 items for 23.00, served with rice, soup and salad"
-    },
-    {
-      "n": 10,
-      "name": "Sesame Chicken",
-      "section": "Dinner Entree",
-      "price_text": null,
-      "price": null,
-      "ingredients": [
-        "chicken",
-        "teriyaki sauce"
-      ],
-      "wrap": "none",
-      "is_raw": false,
-      "notes": "menu code D6; crispy deep fried chicken leg meat, teriyaki sauce on the side; choose 2 items for 23.00, served with rice, soup and salad"
-    },
-    {
-      "n": 11,
-      "name": "Spicy Sesame Chicken",
-      "section": "Dinner Entree",
-      "price_text": null,
-      "price": null,
-      "ingredients": [
-        "chicken",
-        "house special sauce",
-        "vegetable"
-      ],
-      "wrap": "none",
-      "is_raw": false,
-      "notes": "menu code D7; crispy deep fried chicken leg meat, stir fried; choose 2 items for 23.00, served with rice, soup and salad"
-    },
-    {
-      "n": 12,
-      "name": "Lemon Shrimp",
-      "section": "Dinner Entree",
-      "price_text": null,
-      "price": null,
-      "ingredients": [
-        "shrimp",
-        "lemon sauce",
-        "vegetable"
-      ],
-      "wrap": "none",
-      "is_raw": false,
-      "notes": "menu code D8; 8 pcs sauteed; menu says White Shrimp, Various Vegetables; choose 2 items for 23.00, served with rice, soup and salad"
-    },
-    {
-      "n": 13,
-      "name": "Gyoza",
-      "section": "Dinner Entree",
-      "price_text": null,
+      "price_text": "2 for 23.00, +1",
       "price": null,
       "ingredients": [
         "beef"
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "menu code D9; deep fried beef dumpling, 6 pcs; choose 2 items for 23.00, served with rice, soup and salad"
+      "notes": "D2; grilled prime grade beef"
     },
     {
-      "n": 14,
+      "n": 6,
+      "name": "Salmon Teriyaki",
+      "section": "Dinner Entree",
+      "price_text": "2 for 23.00, +2",
+      "price": null,
+      "ingredients": [
+        "salmon"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "D3; grilled salmon fillet"
+    },
+    {
+      "n": 7,
+      "name": "Garlic Chicken",
+      "section": "Dinner Entree",
+      "price_text": "2 for 23.00",
+      "price": null,
+      "ingredients": [
+        "chicken",
+        "garlic"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "D4; grilled chicken breast, garlic sauce, various unspecified vegetables"
+    },
+    {
+      "n": 8,
+      "name": "Spicy Chicken",
+      "section": "Dinner Entree",
+      "price_text": "2 for 23.00",
+      "price": null,
+      "ingredients": [
+        "chicken",
+        "spicy sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "D5; grilled chicken breast, various unspecified vegetables"
+    },
+    {
+      "n": 9,
+      "name": "Sesame Chicken",
+      "section": "Dinner Entree",
+      "price_text": "2 for 23.00",
+      "price": null,
+      "ingredients": [
+        "chicken",
+        "teriyaki sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "D6; crispy deep fried chicken leg, teriyaki on side"
+    },
+    {
+      "n": 10,
+      "name": "Spicy Sesame Chicken",
+      "section": "Dinner Entree",
+      "price_text": "2 for 23.00",
+      "price": null,
+      "ingredients": [
+        "chicken",
+        "house special sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "D7; crispy deep fried chicken leg, stir fried, various unspecified vegetables"
+    },
+    {
+      "n": 11,
+      "name": "Lemon Shrimp",
+      "section": "Dinner Entree",
+      "price_text": "2 for 23.00",
+      "price": null,
+      "ingredients": [
+        "shrimp",
+        "lemon sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "D8; 8 pcs white shrimp, sauteed, various unspecified vegetables"
+    },
+    {
+      "n": 12,
+      "name": "Gyoza",
+      "section": "Dinner Entree",
+      "price_text": "2 for 23.00",
+      "price": null,
+      "ingredients": [
+        "beef"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "D9; deep fried beef dumpling, 6 pcs"
+    },
+    {
+      "n": 13,
       "name": "Mixed Tempura",
       "section": "Dinner Entree",
-      "price_text": null,
+      "price_text": "2 for 23.00",
       "price": null,
       "ingredients": [
         "shrimp",
@@ -211,13 +199,13 @@
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "menu code D10; deep fried: 2 shrimp, 1 yam, 1 zucchini, 2 onion, 4 green beans; choose 2 items for 23.00, served with rice, soup and salad"
+      "notes": "D10; deep fried; 2 shrimp, 1 yam, 1 zucchini, 2 onion, 4 green beans"
     },
     {
-      "n": 15,
+      "n": 14,
       "name": "Vegetable Tempura",
       "section": "Dinner Entree",
-      "price_text": null,
+      "price_text": "2 for 23.00",
       "price": null,
       "ingredients": [
         "onion",
@@ -227,13 +215,13 @@
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "menu code D11; deep fried: 2 onion, 2 zucchini, 4 green beans, 2 yam; choose 2 items for 23.00, served with rice, soup and salad"
+      "notes": "D11; deep fried; 2 onion, 2 zucchini, 4 green beans, 2 yam"
     },
     {
-      "n": 16,
+      "n": 15,
       "name": "Assorted Sashimi",
       "section": "Dinner Entree",
-      "price_text": null,
+      "price_text": "2 for 23.00, +2",
       "price": null,
       "ingredients": [
         "tuna",
@@ -242,41 +230,41 @@
       ],
       "wrap": "none",
       "is_raw": true,
-      "notes": "menu code D12; menu says (ADD$2); 2 tuna, 2 salmon, 2 albacore; choose 2 items for 23.00, served with rice, soup and salad"
+      "notes": "D12; 2 tuna, 2 salmon, 2 albacore"
     },
     {
-      "n": 17,
+      "n": 16,
       "name": "California Roll",
       "section": "Dinner Entree",
-      "price_text": null,
+      "price_text": "2 for 23.00",
       "price": null,
       "ingredients": [
-        "imitation crab",
+        "crab meat",
         "avocado",
         "cucumber"
       ],
       "wrap": "nori",
       "is_raw": false,
-      "notes": "menu code D13; INFERRED fillings, no description printed; choose 2 items for 23.00, served with rice, soup and salad"
+      "notes": "D13; INFERRED ingredients"
     },
     {
-      "n": 18,
+      "n": 17,
       "name": "Spicy Tuna Roll",
       "section": "Dinner Entree",
-      "price_text": null,
+      "price_text": "2 for 23.00",
       "price": null,
       "ingredients": [
         "spicy tuna"
       ],
       "wrap": "nori",
       "is_raw": true,
-      "notes": "menu code D14; INFERRED fillings, no description printed; orange dot icon on menu; choose 2 items for 23.00, served with rice, soup and salad"
+      "notes": "D14"
     },
     {
-      "n": 19,
+      "n": 18,
       "name": "Vegetable Roll",
       "section": "Dinner Entree",
-      "price_text": null,
+      "price_text": "2 for 23.00",
       "price": null,
       "ingredients": [
         "avocado",
@@ -284,7 +272,7 @@
       ],
       "wrap": "nori",
       "is_raw": false,
-      "notes": "menu code D15; INFERRED fillings, no description printed; choose 2 items for 23.00, served with rice, soup and salad"
+      "notes": "D15; INFERRED ingredients"
     }
   ]
 }

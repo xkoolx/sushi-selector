@@ -1,6 +1,9 @@
 {
-  "restaurant_name": "KM Sushi",
-  "source_photos": ["IMG_3433"],
+  "restaurant_name": null,
+  "source_photos": [
+    "IMG_3433"
+  ],
+  "notes": "KM Sushi menu, but the restaurant name is not printed on this page, so restaurant_name is null per the evidence-based convention.",
   "items": [
     {
       "n": 1,
@@ -8,7 +11,15 @@
       "section": "Sashimi Special",
       "price_text": "29.99",
       "price": 29.99,
-      "ingredients": ["tuna", "salmon", "albacore", "yellowtail", "escolar", "seared tuna", "shrimp"],
+      "ingredients": [
+        "tuna",
+        "salmon",
+        "albacore",
+        "yellowtail",
+        "escolar",
+        "seared tuna",
+        "shrimp"
+      ],
       "wrap": "none",
       "is_raw": true,
       "notes": "20 pcs, 3 pcs each of assorted sashimi with 2 ebi"
@@ -19,7 +30,17 @@
       "section": "Sashimi Special",
       "price_text": "44.99",
       "price": 44.99,
-      "ingredients": ["tuna", "salmon", "albacore", "yellowtail", "escolar", "seared tuna", "shrimp", "octopus", "japanese scallop"],
+      "ingredients": [
+        "tuna",
+        "salmon",
+        "albacore",
+        "yellowtail",
+        "escolar",
+        "seared tuna",
+        "shrimp",
+        "octopus",
+        "japanese scallop"
+      ],
       "wrap": "none",
       "is_raw": true,
       "notes": "31 pcs, 4 pcs each of assorted sashimi with 2 ebi, 3 octopus, 2 japanese scallop"
@@ -30,7 +51,18 @@
       "section": "Sashimi Special",
       "price_text": "54.99",
       "price": 54.99,
-      "ingredients": ["tuna", "salmon", "albacore", "yellowtail", "escolar", "seared tuna", "shrimp", "octopus", "sweet shrimp", "sea urchin"],
+      "ingredients": [
+        "tuna",
+        "salmon",
+        "albacore",
+        "yellowtail",
+        "escolar",
+        "seared tuna",
+        "shrimp",
+        "octopus",
+        "sweet shrimp",
+        "sea urchin"
+      ],
       "wrap": "none",
       "is_raw": true,
       "notes": "39 pcs, 5 pcs each of assorted sashimi with 2 ebi, 4 octopus, 1 sweet shrimp, 2 sea urchin"
@@ -41,7 +73,9 @@
       "section": "Sashimi",
       "price_text": "17.95",
       "price": 17.95,
-      "ingredients": ["tuna"],
+      "ingredients": [
+        "tuna"
+      ],
       "wrap": "none",
       "is_raw": true,
       "notes": "served with 7 pcs"
@@ -52,7 +86,9 @@
       "section": "Sashimi",
       "price_text": "17.65",
       "price": 17.65,
-      "ingredients": ["salmon"],
+      "ingredients": [
+        "salmon"
+      ],
       "wrap": "none",
       "is_raw": true,
       "notes": "served with 7 pcs"
@@ -63,7 +99,9 @@
       "section": "Sashimi",
       "price_text": "17.85",
       "price": 17.85,
-      "ingredients": ["yellowtail"],
+      "ingredients": [
+        "yellowtail"
+      ],
       "wrap": "none",
       "is_raw": true,
       "notes": "served with 7 pcs"
@@ -74,7 +112,9 @@
       "section": "Sashimi",
       "price_text": "16.99",
       "price": 16.99,
-      "ingredients": ["albacore"],
+      "ingredients": [
+        "albacore"
+      ],
       "wrap": "none",
       "is_raw": true,
       "notes": "served with 7 pcs"
@@ -85,7 +125,9 @@
       "section": "Sashimi",
       "price_text": "17.99",
       "price": 17.99,
-      "ingredients": ["seared tuna"],
+      "ingredients": [
+        "seared tuna"
+      ],
       "wrap": "none",
       "is_raw": true,
       "notes": "served with 7 pcs; seared outside, raw center"
@@ -96,7 +138,9 @@
       "section": "Premium Sashimi",
       "price_text": "MP",
       "price": null,
-      "ingredients": ["tuna belly"],
+      "ingredients": [
+        "tuna belly"
+      ],
       "wrap": "none",
       "is_raw": true,
       "notes": "Maguro Toro; seasonal, market price"
@@ -107,7 +151,9 @@
       "section": "Premium Sashimi",
       "price_text": "MP",
       "price": null,
-      "ingredients": ["sea bream"],
+      "ingredients": [
+        "sea bream"
+      ],
       "wrap": "none",
       "is_raw": true,
       "notes": "Tai; seasonal, market price"
@@ -118,7 +164,9 @@
       "section": "Premium Sashimi",
       "price_text": "MP",
       "price": null,
-      "ingredients": ["spanish mackerel"],
+      "ingredients": [
+        "spanish mackerel"
+      ],
       "wrap": "none",
       "is_raw": true,
       "notes": "Aji; seasonal, market price"
@@ -129,7 +177,9 @@
       "section": "Premium Sashimi",
       "price_text": "MP",
       "price": null,
-      "ingredients": ["sweet shrimp"],
+      "ingredients": [
+        "sweet shrimp"
+      ],
       "wrap": "none",
       "is_raw": true,
       "notes": "Amaebi; seasonal, market price"

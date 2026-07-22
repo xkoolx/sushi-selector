@@ -138,6 +138,11 @@ covers all photos in the job. Rules:
 4. Overall progress aggregates across photos: total steps = sum of each
    photo's index plus details batches. The progress screen shows per-photo
    completion (photo 1 of 2, and so on).
+5. Restaurant name: each photo reports restaurant_name only when it is literally
+   printed in that image, never inferred from context, and null when absent. At
+   merge time, take the first non-null restaurant_name in photo order. If every
+   photo returns null, label the saved menu "Menu, <date>" for the recent-menus
+   list. Typically only one page (or no page) carries the name.
 
 ## Worker API
 

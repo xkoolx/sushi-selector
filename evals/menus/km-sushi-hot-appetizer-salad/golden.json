@@ -1,25 +1,288 @@
 {
-  "restaurant_name": "KM Sushi",
-  "source_photos": ["IMG_3441"],
+  "restaurant_name": null,
+  "source_photos": [
+    "IMG_3441"
+  ],
+  "notes": "KUU SUSHI menu; restaurant name not printed on this page. smelt roe normalized to masago, bonito flake to katsuo bushi.",
   "items": [
-    { "n": 1, "name": "Soy Beans", "section": "Hot Appetizer", "price_text": "5.75", "price": 5.75, "ingredients": ["soy bean"], "wrap": "none", "is_raw": false, "notes": "menu code HA1; boiled soy bean pods, lightly salted (edamame)" },
-    { "n": 2, "name": "Garlic Soy Beans", "section": "Hot Appetizer", "price_text": "6.95", "price": 6.95, "ingredients": ["soy bean", "garlic", "butter", "soy sauce"], "wrap": "none", "is_raw": false, "notes": "menu code HA2; sauteed" },
-    { "n": 3, "name": "Spicy Soy Beans", "section": "Hot Appetizer", "price_text": "7.45", "price": 7.45, "ingredients": ["soy bean", "spicy sauce"], "wrap": "none", "is_raw": false, "notes": "menu code HA3; sauteed, chili icon on menu" },
-    { "n": 4, "name": "Gyoza", "section": "Hot Appetizer", "price_text": "8.95", "price": 8.95, "ingredients": ["beef"], "wrap": "none", "is_raw": false, "notes": "menu code HA4; deep fried beef dumpling, 6 pcs" },
-    { "n": 5, "name": "Agedashi Tofu", "section": "Hot Appetizer", "price_text": "6.99", "price": 6.99, "ingredients": ["tofu", "bonito flake", "ponzu"], "wrap": "none", "is_raw": false, "notes": "menu code HA5; 4 pcs deep fried; menu says Kastuo bushi (katsuobushi)" },
-    { "n": 6, "name": "Mixed Tempura", "section": "Hot Appetizer", "price_text": "10.95", "price": 10.95, "ingredients": ["shrimp", "zucchini", "yellow onion", "green bean", "yam"], "wrap": "none", "is_raw": false, "notes": "menu code HA6; deep fried: 2 shrimp, 1 zucchini, 1 yellow onion, 2 green beans, 1 yam" },
-    { "n": 7, "name": "Vegetable Tempura", "section": "Hot Appetizer", "price_text": "9.99", "price": 9.99, "ingredients": ["yam", "green bean", "zucchini", "yellow onion"], "wrap": "none", "is_raw": false, "notes": "menu code HA7; deep fried: 2 yam, 4 green beans, 2 zucchini, 2 yellow onion" },
-    { "n": 8, "name": "Shrimp Tempura", "section": "Hot Appetizer", "price_text": "10.50", "price": 10.50, "ingredients": ["shrimp"], "wrap": "none", "is_raw": false, "notes": "menu code HA8; deep fried, 4 pcs" },
-    { "n": 9, "name": "Baked Green Mussel", "section": "Hot Appetizer", "price_text": "12.95", "price": 12.95, "ingredients": ["green mussel", "mayo"], "wrap": "none", "is_raw": false, "notes": "menu code HA9; half shell, baked; menu says Mayo Sauce" },
-    { "n": 10, "name": "Deep Fried Soft Shell Crab", "section": "Hot Appetizer", "price_text": "12.75", "price": 12.75, "ingredients": ["soft shell crab", "tartar sauce"], "wrap": "none", "is_raw": false, "notes": "menu code HA10; panko breaded, deep fried; menu says Tar-Tar Sauce" },
-    { "n": 11, "name": "Japanese Vegetable Pancake", "section": "Hot Appetizer", "price_text": "9.95", "price": 9.95, "ingredients": ["egg", "flour", "cabbage", "scallion"], "wrap": "none", "is_raw": false, "notes": "menu code HA11; pan fried vegetable mix (okonomiyaki style); menu says Green onion" },
-
-    { "n": 12, "name": "Green Salad", "section": "Salad", "price_text": "7.95", "price": 7.95, "ingredients": ["iceberg lettuce", "cucumber", "tomato", "purple cabbage", "carrot", "house dressing"], "wrap": "none", "is_raw": false, "notes": "menu code S1; cabbage and carrot shredded" },
-    { "n": 13, "name": "Seaweed Salad", "section": "Salad", "price_text": "6.75", "price": 6.75, "ingredients": ["seaweed", "radish", "sesame oil"], "wrap": "none", "is_raw": false, "notes": "menu code S2; wakame style salad seaweed, not nori; menu says Complimented Sesame Oil" },
-    { "n": 14, "name": "Cucumber Salad", "section": "Salad", "price_text": "5.99", "price": 5.99, "ingredients": ["cucumber", "house dressing"], "wrap": "none", "is_raw": false, "notes": "menu code S3; fresh sliced, seasoned" },
-    { "n": 15, "name": "Salmon Skin Salad", "section": "Salad", "price_text": "11.99", "price": 11.99, "ingredients": ["spring green", "cucumber", "smelt roe", "seaweed flake", "salmon skin", "house dressing"], "wrap": "none", "is_raw": true, "notes": "menu code S4; salmon skin is crispy baked (cooked), raw due to masago roe; menu says Masago" },
-    { "n": 16, "name": "Sashimi Salad", "section": "Salad", "price_text": "16.95", "price": 16.95, "ingredients": ["spring green", "cucumber", "smelt roe", "seaweed flake", "assorted sashimi", "house dressing"], "wrap": "none", "is_raw": true, "notes": "menu code S5; menu says Masago" },
-    { "n": 17, "name": "Tuna Poke Salad", "section": "Salad", "price_text": "16.45", "price": 16.45, "ingredients": ["spring green", "cucumber", "smelt roe", "seaweed flake", "tuna", "japanese vegetable", "house dressing"], "wrap": "none", "is_raw": true, "notes": "menu code S6; chili icon on menu; menu says Fresh Tuna, Masago, Japanese Vegetables" },
-    { "n": 18, "name": "Avocado Salad", "section": "Salad", "price_text": "14.75", "price": 14.75, "ingredients": ["spring green", "cucumber", "seaweed flake", "avocado", "mango", "citrus house dressing"], "wrap": "none", "is_raw": false, "notes": "menu code S7; dressing line runs past photo edge, reads Citrus House Dres(sing)" }
+    {
+      "n": 1,
+      "name": "Soy Beans",
+      "section": "Hot Appetizer",
+      "price_text": "5.75",
+      "price": 5.75,
+      "ingredients": [
+        "soybean"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "HA1; boiled, lightly salted"
+    },
+    {
+      "n": 2,
+      "name": "Garlic Soy Beans",
+      "section": "Hot Appetizer",
+      "price_text": "6.95",
+      "price": 6.95,
+      "ingredients": [
+        "soybean",
+        "garlic",
+        "butter",
+        "soy sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "HA2; sauteed"
+    },
+    {
+      "n": 3,
+      "name": "Spicy Soy Beans",
+      "section": "Hot Appetizer",
+      "price_text": "7.45",
+      "price": 7.45,
+      "ingredients": [
+        "soybean",
+        "spicy sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "HA3; sauteed"
+    },
+    {
+      "n": 4,
+      "name": "Gyoza",
+      "section": "Hot Appetizer",
+      "price_text": "8.95",
+      "price": 8.95,
+      "ingredients": [
+        "beef"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "HA4; deep fried beef dumpling, 6 pcs"
+    },
+    {
+      "n": 5,
+      "name": "Agedashi Tofu",
+      "section": "Hot Appetizer",
+      "price_text": "6.99",
+      "price": 6.99,
+      "ingredients": [
+        "tofu",
+        "katsuo bushi",
+        "ponzu"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "HA5; 4 pcs deep fried tofu; bonito flake = katsuo bushi"
+    },
+    {
+      "n": 6,
+      "name": "Mixed Tempura",
+      "section": "Hot Appetizer",
+      "price_text": "10.95",
+      "price": 10.95,
+      "ingredients": [
+        "shrimp",
+        "zucchini",
+        "yellow onion",
+        "green bean",
+        "yam"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "HA6; deep fried; 2 shrimp, 1 zucchini, 1 yellow onion, 2 green beans, 1 yam"
+    },
+    {
+      "n": 7,
+      "name": "Vegetable Tempura",
+      "section": "Hot Appetizer",
+      "price_text": "9.99",
+      "price": 9.99,
+      "ingredients": [
+        "yam",
+        "green bean",
+        "zucchini",
+        "yellow onion"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "HA7; deep fried; 2 yam, 4 green beans, 2 zucchini, 2 yellow onion"
+    },
+    {
+      "n": 8,
+      "name": "Shrimp Tempura",
+      "section": "Hot Appetizer",
+      "price_text": "10.50",
+      "price": 10.5,
+      "ingredients": [
+        "shrimp"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "HA8; deep fried, 4 pcs"
+    },
+    {
+      "n": 9,
+      "name": "Baked Green Mussel",
+      "section": "Hot Appetizer",
+      "price_text": "12.95",
+      "price": 12.95,
+      "ingredients": [
+        "green mussel",
+        "mayo"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "HA9; half shell, baked"
+    },
+    {
+      "n": 10,
+      "name": "Deep Fried Soft Shell Crab",
+      "section": "Hot Appetizer",
+      "price_text": "12.75",
+      "price": 12.75,
+      "ingredients": [
+        "soft shell crab",
+        "tartar sauce"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "HA10; panko breaded"
+    },
+    {
+      "n": 11,
+      "name": "Japanese Vegetable Pancake",
+      "section": "Hot Appetizer",
+      "price_text": "9.95",
+      "price": 9.95,
+      "ingredients": [
+        "egg",
+        "cabbage",
+        "green onion",
+        "flour"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "HA11; okonomiyaki, pan fried"
+    },
+    {
+      "n": 12,
+      "name": "Green Salad",
+      "section": "Salad",
+      "price_text": "7.95",
+      "price": 7.95,
+      "ingredients": [
+        "iceberg lettuce",
+        "cucumber",
+        "tomato",
+        "purple cabbage",
+        "carrot",
+        "house dressing"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "S1"
+    },
+    {
+      "n": 13,
+      "name": "Seaweed Salad",
+      "section": "Salad",
+      "price_text": "6.75",
+      "price": 6.75,
+      "ingredients": [
+        "seaweed",
+        "radish",
+        "sesame oil"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "S2"
+    },
+    {
+      "n": 14,
+      "name": "Cucumber Salad",
+      "section": "Salad",
+      "price_text": "5.99",
+      "price": 5.99,
+      "ingredients": [
+        "cucumber",
+        "house dressing"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "S3"
+    },
+    {
+      "n": 15,
+      "name": "Salmon Skin Salad",
+      "section": "Salad",
+      "price_text": "11.99",
+      "price": 11.99,
+      "ingredients": [
+        "spring green",
+        "cucumber",
+        "masago",
+        "seaweed",
+        "salmon skin",
+        "house dressing"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "S4; crispy baked salmon skin"
+    },
+    {
+      "n": 16,
+      "name": "Sashimi Salad",
+      "section": "Salad",
+      "price_text": "16.95",
+      "price": 16.95,
+      "ingredients": [
+        "spring green",
+        "cucumber",
+        "masago",
+        "seaweed",
+        "house dressing"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "S5; assorted sashimi not itemized"
+    },
+    {
+      "n": 17,
+      "name": "Tuna Poke Salad",
+      "section": "Salad",
+      "price_text": "16.45",
+      "price": 16.45,
+      "ingredients": [
+        "spring green",
+        "cucumber",
+        "masago",
+        "seaweed",
+        "tuna",
+        "house dressing"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "S6"
+    },
+    {
+      "n": 18,
+      "name": "Avocado Salad",
+      "section": "Salad",
+      "price_text": "14.75",
+      "price": 14.75,
+      "ingredients": [
+        "spring green",
+        "cucumber",
+        "seaweed",
+        "avocado",
+        "mango",
+        "citrus dressing"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "S7"
+    }
   ]
 }

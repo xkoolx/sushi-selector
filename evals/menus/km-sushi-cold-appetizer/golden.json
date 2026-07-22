@@ -1,14 +1,132 @@
 {
-  "restaurant_name": "KM Sushi",
-  "source_photos": ["IMG_3440"],
+  "restaurant_name": null,
+  "source_photos": [
+    "IMG_3440"
+  ],
+  "notes": "KUU SUSHI menu; restaurant name not printed on this page.",
   "items": [
-    { "n": 1, "name": "CA1 Sushi Sampler", "section": "Cold Appetizer", "price_text": "14.95", "price": 14.95, "ingredients": ["assorted fish"], "wrap": "none", "is_raw": true, "notes": "6 pcs assorted sushi, chef's choice; INFERRED (menu does not name the fish)" },
-    { "n": 2, "name": "CA2 Sashimi Sampler", "section": "Cold Appetizer", "price_text": "15.95", "price": 15.95, "ingredients": ["assorted fish"], "wrap": "none", "is_raw": true, "notes": "8 pcs assorted sashimi, chef's choice; INFERRED (menu does not name the fish)" },
-    { "n": 3, "name": "CA3 Fresh Tofu", "section": "Cold Appetizer", "price_text": "7.99", "price": 7.99, "ingredients": ["tofu", "yuzu dressing", "ponzu", "scallion", "fried garlic"], "wrap": "none", "is_raw": false, "notes": "menu prints fried sliced garlic topping" },
-    { "n": 4, "name": "CA4 Tataki", "section": "Cold Appetizer", "price_text": "14.99", "price": 14.99, "ingredients": ["seared garlic tuna", "garlic spinach"], "wrap": "none", "is_raw": true, "notes": "5 pcs, seared outside with raw center, garlic spinach on top" },
-    { "n": 5, "name": "CA5 Seared Yellowtail", "section": "Cold Appetizer", "price_text": "14.95", "price": 14.95, "ingredients": ["yellowtail belly", "jalapeno"], "wrap": "none", "is_raw": true, "notes": "6 pcs seared yellowtail belly sashimi, sliced jalapeno on top" },
-    { "n": 6, "name": "CA6 Chilled Oyster", "section": "Cold Appetizer", "price_text": "8.99", "price": 8.99, "ingredients": ["oyster", "ponzu", "scallion", "sriracha", "smelt roe"], "wrap": "none", "is_raw": true, "notes": "3 pcs half shell oyster, raw shellfish" },
-    { "n": 7, "name": "CA7 Oyster Shooter", "section": "Cold Appetizer", "price_text": "7.50", "price": 7.50, "ingredients": ["oyster", "quail egg", "ponzu", "smelt roe", "tabasco", "sriracha", "scallion"], "wrap": "none", "is_raw": true, "notes": "raw shellfish shooter" },
-    { "n": 8, "name": "CA8 Uni Shooter", "section": "Cold Appetizer", "price_text": "13.99", "price": 13.99, "ingredients": ["sea urchin", "ponzu", "smelt roe", "tabasco", "sriracha", "scallion", "quail egg"], "wrap": "none", "is_raw": true, "notes": "menu prints Qauil Egg, a typo for quail egg" }
+    {
+      "n": 1,
+      "name": "Sushi Sampler",
+      "section": "Cold Appetizer",
+      "price_text": "14.95",
+      "price": 14.95,
+      "ingredients": [],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "CA1; 6 pcs assorted sushi, contents not specified"
+    },
+    {
+      "n": 2,
+      "name": "Sashimi Sampler",
+      "section": "Cold Appetizer",
+      "price_text": "15.95",
+      "price": 15.95,
+      "ingredients": [],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "CA2; 8 pcs assorted sashimi, contents not specified"
+    },
+    {
+      "n": 3,
+      "name": "Fresh Tofu",
+      "section": "Cold Appetizer",
+      "price_text": "7.99",
+      "price": 7.99,
+      "ingredients": [
+        "tofu",
+        "yuzu dressing",
+        "ponzu",
+        "green onion",
+        "fried garlic"
+      ],
+      "wrap": "none",
+      "is_raw": false,
+      "notes": "CA3"
+    },
+    {
+      "n": 4,
+      "name": "Tataki",
+      "section": "Cold Appetizer",
+      "price_text": "14.99",
+      "price": 14.99,
+      "ingredients": [
+        "seared tuna",
+        "garlic",
+        "spinach"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "CA4; 5 pcs seared garlic tuna with garlic spinach on top"
+    },
+    {
+      "n": 5,
+      "name": "Seared Yellowtail",
+      "section": "Cold Appetizer",
+      "price_text": "14.95",
+      "price": 14.95,
+      "ingredients": [
+        "yellowtail belly",
+        "jalapeno"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "CA5; 6 pcs yellowtail belly sashimi with sliced jalapeno on top"
+    },
+    {
+      "n": 6,
+      "name": "Chilled Oyster",
+      "section": "Cold Appetizer",
+      "price_text": "8.99",
+      "price": 8.99,
+      "ingredients": [
+        "oyster",
+        "ponzu",
+        "green onion",
+        "sriracha",
+        "masago"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "CA6; 3 pcs half shell oyster; smelt roe = masago"
+    },
+    {
+      "n": 7,
+      "name": "Oyster Shooter",
+      "section": "Cold Appetizer",
+      "price_text": "7.50",
+      "price": 7.5,
+      "ingredients": [
+        "oyster",
+        "quail egg",
+        "ponzu",
+        "masago",
+        "tabasco",
+        "sriracha",
+        "green onion"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "CA7; smelt roe = masago"
+    },
+    {
+      "n": 8,
+      "name": "Uni Shooter",
+      "section": "Cold Appetizer",
+      "price_text": "13.99",
+      "price": 13.99,
+      "ingredients": [
+        "sea urchin",
+        "ponzu",
+        "masago",
+        "tabasco",
+        "sriracha",
+        "green onion",
+        "quail egg"
+      ],
+      "wrap": "none",
+      "is_raw": true,
+      "notes": "CA8; smelt roe = masago"
+    }
   ]
 }

@@ -1,8 +1,9 @@
 {
-  "restaurant_name": "KM Sushi",
+  "restaurant_name": null,
   "source_photos": [
     "IMG_3442"
   ],
+  "notes": "KUU SUSHI menu; restaurant name not printed on this page. All items cooked. Rice excluded from ingredients per convention (rice bowls keep their toppings only).",
   "items": [
     {
       "n": 1,
@@ -11,12 +12,13 @@
       "price_text": "2.95",
       "price": 2.95,
       "ingredients": [
+        "miso",
         "tofu",
         "seaweed"
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "menu code N1; japanese soy bean paste soup; menu says seaweed; seaweed kept as seaweed (wakame, not nori)"
+      "notes": "N1"
     },
     {
       "n": 2,
@@ -25,13 +27,13 @@
       "price_text": "13.99",
       "price": 13.99,
       "ingredients": [
-        "soy sauce broth",
         "udon noodle",
-        "chicken"
+        "chicken",
+        "soy sauce broth"
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "menu code N2; grilled chicken leg meat; menu says thick noodle"
+      "notes": "N2"
     },
     {
       "n": 3,
@@ -40,13 +42,12 @@
       "price_text": "13.99",
       "price": 13.99,
       "ingredients": [
-        "soy sauce broth",
         "udon noodle",
-        "vegetable"
+        "soy sauce broth"
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "menu code N3; various vegetables; menu says thick noodle"
+      "notes": "N3; various vegetables not itemized"
     },
     {
       "n": 4,
@@ -55,12 +56,13 @@
       "price_text": "14.95",
       "price": 14.95,
       "ingredients": [
-        "spicy beef",
-        "udon noodle"
+        "udon noodle",
+        "beef",
+        "spicy broth"
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "menu code N4; spicy sauteed beef in broth; menu says thick noodle"
+      "notes": "N4"
     },
     {
       "n": 5,
@@ -69,17 +71,17 @@
       "price_text": "16.50",
       "price": 16.5,
       "ingredients": [
-        "soy sauce broth",
         "udon noodle",
-        "tempura shrimp",
+        "shrimp",
         "yam",
         "zucchini",
-        "onion",
-        "green bean"
+        "yellow onion",
+        "green bean",
+        "soy sauce broth"
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "menu code N5; mixed tempura: 2 shrimp, 1 yam, 1 zucchini, 1 yellow onion, 2 green bean; menu says thick noodle"
+      "notes": "N5; mixed tempura in broth; 2 shrimp, 1 yam, 1 zucchini, 1 yellow onion, 2 green bean"
     },
     {
       "n": 6,
@@ -88,14 +90,14 @@
       "price_text": "16.50",
       "price": 16.5,
       "ingredients": [
-        "pork broth",
-        "chashu pork",
-        "boiled egg",
-        "ramen noodle"
+        "ramen noodle",
+        "pork",
+        "egg",
+        "pork broth"
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "menu code N6; menu says cha-shu; donkotsu is the menu's spelling of tonkotsu"
+      "notes": "N6; menu spelling 'Donkotsu' (tonkotsu); cha-shu pork, boiled egg"
     },
     {
       "n": 7,
@@ -104,27 +106,29 @@
       "price_text": "15.50",
       "price": 15.5,
       "ingredients": [
-        "seafood",
+        "ramen noodle",
         "green mussel",
-        "ramen noodle"
+        "spicy broth"
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "menu code N7; spicy korean ramen; various seafood; 2 pcs green mussel"
+      "notes": "N7; spicy korean ramen, 2 pcs green mussel; various seafood not itemized"
     },
     {
       "n": 8,
       "name": "Yakisoba",
       "section": "Soup & Noodles",
-      "price_text": "Chicken / Vegetable 14.45, Steak / Shrimp 15.45",
+      "price_text": "14.45 / 15.45",
       "price": null,
       "ingredients": [
         "yakisoba noodle",
-        "vegetable"
+        "chicken",
+        "steak",
+        "shrimp"
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "menu code N8; stirred fried noodle; choice of meat: chicken, vegetable, steak, or shrimp; two printed prices, none picked"
+      "notes": "N8; choice of meat: chicken/vegetable 14.45, steak/shrimp 15.45; price null (multi-price); vegetable option not itemized in ingredients"
     },
     {
       "n": 9,
@@ -132,38 +136,45 @@
       "section": "Children's Combo",
       "price_text": "14.50",
       "price": 14.5,
-      "ingredients": [],
+      "ingredients": [
+        "chicken",
+        "steak",
+        "shrimp",
+        "pork"
+      ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "choose 2 items: chicken teriyaki, steak teriyaki, sesame chicken, mixed tempura, gyoza (4 pcs); combo box, no invented ingredient list"
+      "notes": "choose 2: chicken teriyaki, steak teriyaki, sesame chicken, mixed tempura (INFERRED shrimp), gyoza (INFERRED pork, 4 pcs)"
     },
     {
       "n": 10,
-      "name": "Chicken",
+      "name": "Chicken Katsu",
       "section": "Katsu",
       "price_text": "17.99",
       "price": 17.99,
       "ingredients": [
         "chicken",
+        "panko",
         "katsu sauce"
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "deep fried panko breaded chicken tender meat; katsu dipping sauce; served w/ rice, soup and salad"
+      "notes": "listed as 'Chicken' under Katsu; served with rice, soup, salad"
     },
     {
       "n": 11,
-      "name": "Pork",
+      "name": "Pork Katsu",
       "section": "Katsu",
       "price_text": "19.99",
       "price": 19.99,
       "ingredients": [
         "pork",
+        "panko",
         "katsu sauce"
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "deep fried panko breaded pork tender loin meat; katsu dipping sauce; served w/ rice, soup and salad"
+      "notes": "listed as 'Pork' under Katsu; served with rice, soup, salad"
     },
     {
       "n": 12,
@@ -178,7 +189,7 @@
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "grilled chicken leg meat; sauteed cabbage; over rice"
+      "notes": "over rice"
     },
     {
       "n": 13,
@@ -193,7 +204,7 @@
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "grilled beef; sauteed cabbage; over rice"
+      "notes": "over rice"
     },
     {
       "n": 14,
@@ -204,11 +215,12 @@
       "ingredients": [
         "chicken",
         "green cabbage",
-        "teriyaki sauce"
+        "teriyaki sauce",
+        "sesame"
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "crispy deep fried chicken leg meat; sauteed cabbage; over rice; description prints no sesame"
+      "notes": "crispy deep fried, over rice"
     },
     {
       "n": 15,
@@ -217,18 +229,17 @@
       "price_text": "12.99",
       "price": 12.99,
       "ingredients": [
-        "green cabbage",
-        "tempura shrimp",
+        "shrimp",
         "onion",
         "yam",
         "zucchini",
         "green bean",
-        "teriyaki sauce",
-        "tempura sauce"
+        "green cabbage",
+        "teriyaki sauce"
       ],
       "wrap": "none",
       "is_raw": false,
-      "notes": "sauteed cabbage; deep fried 2 shrimp; vegetables: 1 onion, 1 yam, 1 zucchini, 2 green bean; tempura sauce on side; over rice"
+      "notes": "over rice, tempura sauce on side; tempura fried: 2 shrimp, 1 onion, 1 yam, 1 zucchini, 2 green beans"
     }
   ]
 }
