@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main, phase-1-extraction]
+  pull_request:
+    branches: [main]
+
+jobs:
+  typecheck:
+    name: TypeScript check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx wrangler types
+      - run: npx tsc --noEmit
+
+  eval-check:
+    name: Eval harness check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv run evals/run_evals.py --check
+
+  secrets-scan:
+    name: Secrets scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for leaked secrets
+        run: |
+          if grep -rE '(sk-ant-|ANTHROPIC_API_KEY|TURNSTILE_SECRET_KEY|SESSION_HMAC_SECRET)\s*=' \
+            --include='*.ts' --include='*.js' --include='*.json' --include='*.jsonc' \
+            --include='*.md' --include='*.yaml' --include='*.yml' \
+            --exclude-dir=node_modules --exclude-dir=.git . ; then
+            echo "::error::Secret reference found in source files"
+            exit 1
+          fi
+          echo "Clean"
