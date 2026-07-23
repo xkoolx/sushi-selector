@@ -18,18 +18,203 @@
   </head>
   <body>
     <main id="app" class="screen">
-      <header class="app-header">
-        <h1 class="app-title">Sushi Selector</h1>
-        <p class="app-tagline">Snap the menu, filter the raw stuff out.</p>
-      </header>
 
-      <section id="home" class="panel" aria-label="Capture">
-        <p class="placeholder">
-          Scaffold ready. Capture, parse, and results land in Phase 1 and 2.
-        </p>
+      <!-- ============ Home screen ============ -->
+      <section id="screen-home" class="screen-section" aria-label="Capture">
+        <header class="app-header">
+          <h1 class="app-title">Sushi Selector</h1>
+          <p class="app-tagline">Snap the menu, filter the raw stuff out.</p>
+        </header>
+
+        <div class="capture-panel panel">
+          <div class="photo-grid" id="photo-grid">
+            <label class="photo-slot photo-slot--add" id="photo-add-slot">
+              <input
+                id="photo-input"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                multiple
+                hidden
+              />
+              <span class="photo-slot__icon" aria-hidden="true">+</span>
+              <span class="photo-slot__label">Add photos</span>
+            </label>
+          </div>
+          <p class="photo-count" id="photo-count"></p>
+
+          <div class="input-divider">
+            <span class="input-divider__line"></span>
+            <span class="input-divider__text">or</span>
+            <span class="input-divider__line"></span>
+          </div>
+
+          <div class="url-field">
+            <input
+              id="url-input"
+              type="url"
+              class="url-input"
+              placeholder="Paste a menu URL"
+              autocomplete="off"
+              autocapitalize="off"
+            />
+          </div>
+
+          <button id="parse-button" class="btn btn--primary" type="button" disabled>
+            Parse menu
+          </button>
+        </div>
+
+        <div id="recent-menus" class="recent-panel" hidden>
+          <h2 class="recent-title">Recent menus</h2>
+          <ul class="recent-list" id="recent-list"></ul>
+        </div>
       </section>
+
+      <!-- ============ Progress screen ============ -->
+      <section id="screen-progress" class="screen-section" aria-label="Progress" hidden>
+        <header class="app-header">
+          <h1 class="app-title">Sushi Selector</h1>
+        </header>
+
+        <div class="progress-panel panel">
+          <p class="progress-state" id="progress-state" aria-live="polite"></p>
+          <div class="progress-photos" id="progress-photos"></div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+          </div>
+          <p class="progress-detail" id="progress-detail"></p>
+        </div>
+      </section>
+
+      <!-- ============ Results screen ============ -->
+      <section id="screen-results" class="screen-section" aria-label="Results" hidden>
+        <header class="results-header">
+          <div class="results-header__top">
+            <h1 class="results-title" id="results-title">Menu</h1>
+            <button class="btn btn--small btn--ghost" id="new-parse-btn" type="button">New</button>
+          </div>
+          <div class="results-toolbar">
+            <div class="search-wrap">
+              <input
+                id="search-input"
+                type="search"
+                class="search-input"
+                placeholder="Search items..."
+                autocomplete="off"
+                autocapitalize="off"
+              />
+            </div>
+            <button class="toolbar-btn" id="sort-btn" type="button" aria-label="Sort">
+              <span class="toolbar-btn__icon" aria-hidden="true">&#8645;</span>
+            </button>
+            <button class="toolbar-btn" id="filter-btn" type="button" aria-label="Filters">
+              <span class="toolbar-btn__icon" aria-hidden="true">&#9776;</span>
+              <span class="filter-badge" id="filter-badge" hidden></span>
+            </button>
+          </div>
+        </header>
+
+        <div class="parse-quality" id="parse-quality" hidden>
+          <button class="parse-quality__toggle" id="quality-toggle" type="button"></button>
+        </div>
+
+        <div class="item-list" id="item-list" role="list"></div>
+
+        <div class="empty-state" id="empty-state" hidden>
+          <p class="empty-state__msg">No rolls match these filters. Loosen one to see more.</p>
+        </div>
+
+        <button class="omakase-btn" id="omakase-btn" type="button" hidden>
+          Omakase
+        </button>
+      </section>
+
+      <!-- ============ Error overlay ============ -->
+      <div id="error-overlay" class="error-overlay" hidden>
+        <div class="error-card panel">
+          <p class="error-msg" id="error-msg"></p>
+          <button class="btn btn--primary" id="error-retry-btn" type="button">Try again</button>
+        </div>
+      </div>
+
     </main>
 
+    <!-- ============ Filter bottom sheet ============ -->
+    <div id="filter-sheet" class="sheet" hidden>
+      <div class="sheet__backdrop" data-dismiss="filter-sheet"></div>
+      <div class="sheet__content" role="dialog" aria-label="Filters">
+        <div class="sheet__handle" aria-hidden="true"></div>
+        <div class="sheet__header">
+          <h2 class="sheet__title">Filters</h2>
+          <button class="btn btn--small btn--ghost" id="filter-clear-btn" type="button">Clear</button>
+        </div>
+        <input
+          id="chip-search"
+          type="search"
+          class="chip-search"
+          placeholder="Search ingredients..."
+          autocomplete="off"
+        />
+        <div class="chip-section" id="raw-chips">
+          <div class="chip-row" id="raw-chip-row"></div>
+        </div>
+        <div class="chip-section" id="wrap-chips">
+          <h3 class="chip-section__title">Wrap</h3>
+          <div class="chip-row" id="wrap-chip-row"></div>
+        </div>
+        <div class="chip-section" id="ingredient-chips">
+          <h3 class="chip-section__title">Ingredients</h3>
+          <div class="chip-row" id="ingredient-chip-row"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ Fix ingredients sheet ============ -->
+    <div id="fix-sheet" class="sheet" hidden>
+      <div class="sheet__backdrop" data-dismiss="fix-sheet"></div>
+      <div class="sheet__content" role="dialog" aria-label="Fix ingredients">
+        <div class="sheet__handle" aria-hidden="true"></div>
+        <div class="sheet__header">
+          <h2 class="sheet__title" id="fix-sheet-title">Fix ingredients</h2>
+          <button class="btn btn--small btn--ghost" id="fix-done-btn" type="button">Done</button>
+        </div>
+        <div class="fix-vocab-chips" id="fix-vocab-chips"></div>
+        <div class="fix-input-row">
+          <input
+            id="fix-input"
+            type="text"
+            class="fix-input"
+            placeholder="Add ingredient..."
+            autocomplete="off"
+          />
+          <button class="btn btn--small" id="fix-add-btn" type="button">Add</button>
+        </div>
+        <div class="fix-current" id="fix-current"></div>
+      </div>
+    </div>
+
+    <!-- ============ Sort menu ============ -->
+    <div id="sort-menu" class="sort-menu" hidden>
+      <button class="sort-option" data-sort="menu" type="button">Menu order</button>
+      <button class="sort-option" data-sort="price-asc" type="button">Price: low to high</button>
+      <button class="sort-option" data-sort="price-desc" type="button">Price: high to low</button>
+    </div>
+
+    <!-- ============ Omakase pick overlay ============ -->
+    <div id="omakase-exhausted" class="omakase-exhausted" hidden>
+      <p class="omakase-exhausted__msg">The chef has shown you everything. Trust your gut, or take a second lap.</p>
+      <div class="omakase-exhausted__actions">
+        <button class="btn btn--small" id="omakase-reshuffle" type="button">Second lap</button>
+        <button class="btn btn--small btn--ghost" id="omakase-open-filters" type="button">Open filters</button>
+      </div>
+    </div>
+
     <script type="module" src="/app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js");
+      }
+    </script>
   </body>
 </html>
