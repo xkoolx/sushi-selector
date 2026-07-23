@@ -1,13 +1,15 @@
 // Orchestrator state machine (SPEC T-1.9). All orchestration, merging,
 // reconciliation, normalization, and persistence happen here in the browser;
-// the worker is a thin authenticated proxy. Phase 2 replaces the interim
-// rendering at the bottom with the real UI (ui.js, filters.js).
+// the worker is a thin authenticated proxy.
 
 import { preprocessPhotos } from "/preprocess.js";
+import {
+  showHome, showProgress, showResults, showError,
+  updateProgress, wireEvents, onParse, onNewParse, onRetryItem,
+  getSelectedFiles, getUrlInput,
+} from "/ui.js";
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
+// ── Constants ──
 
 export const STATES = ["IDLE", "PREPROCESS", "INDEX", "DETAILS", "RECONCILE", "READY", "ERROR"];
 
@@ -19,13 +21,9 @@ const RESUME_MAX_AGE_MS = 30 * 60 * 1000;
 const JOB_KEY_PREFIX = "ss:job:";
 const MENU_KEY_PREFIX = "ss:menu:";
 
-// ---------------------------------------------------------------------------
-// Fuzzy name matching (mirrors the eval harness rule: token_sort_ratio >= 85)
-// ---------------------------------------------------------------------------
+// ── Fuzzy name matching ──
 
 function indelDistance(a, b) {
-  // Levenshtein restricted to insertions and deletions, which is what
-  // rapidfuzz's ratio family measures underneath.
   const m = a.length;
   const n = b.length;
   let prev = new Array(n + 1);
@@ -49,10 +47,7 @@ export function tokenSortRatio(a, b) {
   return (100 * (total - indelDistance(sa, sb))) / total;
 }
 
-// ---------------------------------------------------------------------------
-// Ingredient normalization (deterministic: lowercase, trim, plural fold,
-// alias table from shared/aliases.json served at /api/aliases)
-// ---------------------------------------------------------------------------
+// ── Ingredient normalization ──
 
 let aliasTable = {};
 
@@ -61,7 +56,7 @@ async function loadAliases() {
     const resp = await fetch("/api/aliases");
     if (resp.ok) aliasTable = await resp.json();
   } catch {
-    // Normalization degrades gracefully to lowercase/plural folding.
+    // Degrades to lowercase/plural folding.
   }
 }
 
@@ -74,10 +69,7 @@ export function normalizeIngredient(name) {
   return aliasTable[n] ?? n;
 }
 
-// ---------------------------------------------------------------------------
-// API helpers. The client owns retries: one retry on 429/5xx/timeout with
-// jittered backoff, because the client owns orchestration state.
-// ---------------------------------------------------------------------------
+// ── API helpers ──
 
 async function apiPost(path, body) {
   let lastError = null;
@@ -96,9 +88,7 @@ async function apiPost(path, body) {
       let detail = {};
       try {
         detail = await resp.json();
-      } catch {
-        // Non-JSON error body; keep the status only.
-      }
+      } catch { /* non-JSON error */ }
       lastError = Object.assign(new Error(detail.message || `Request failed (${resp.status})`), {
         status: resp.status,
         code: detail.error,
@@ -112,9 +102,6 @@ async function apiPost(path, body) {
   throw lastError;
 }
 
-// One Turnstile solve authorizes one parse session. The widget itself is
-// wired in Phase 2; until then the worker's dev mode (no secret configured)
-// accepts any token string locally.
 async function getSessionToken() {
   let turnstileToken = "dev";
   if (typeof window.turnstile !== "undefined" && window.turnstile.getResponse) {
@@ -124,11 +111,7 @@ async function getSessionToken() {
   return resp.sessionToken;
 }
 
-// ---------------------------------------------------------------------------
-// Job persistence. The full job object is written to localStorage after
-// every transition under ss:job:<jobHash>; a job younger than 30 minutes
-// resumes from its last completed step per photo.
-// ---------------------------------------------------------------------------
+// ── Job persistence ──
 
 async function sha256Hex(text) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
@@ -138,17 +121,12 @@ async function sha256Hex(text) {
 function persistJob(job) {
   job.updatedAt = Date.now();
   const key = JOB_KEY_PREFIX + job.jobHash;
-  const withPhotos = { ...job };
   try {
-    localStorage.setItem(key, JSON.stringify(withPhotos));
+    localStorage.setItem(key, JSON.stringify(job));
   } catch {
-    // Quota exceeded: drop the photo bytes and keep the orchestration state,
-    // so at least completed results survive a reload.
     try {
       localStorage.setItem(key, JSON.stringify({ ...job, photos: null }));
-    } catch {
-      // Persistence is best effort; the parse continues in memory.
-    }
+    } catch { /* best effort */ }
   }
 }
 
@@ -172,12 +150,7 @@ function loadResumableJob() {
   return null;
 }
 
-// ---------------------------------------------------------------------------
-// Per-photo pipeline: INDEX, then DETAILS with a warm-then-fan-out schedule,
-// then RECONCILE. Batch 1 goes alone so its response writes the prompt cache
-// (entries become readable only after the first response begins); the
-// remaining batches of 8 fan out with concurrency 3 and pay the cached rate.
-// ---------------------------------------------------------------------------
+// ── Per-photo pipeline ──
 
 function batchItems(items) {
   const batches = [];
@@ -247,24 +220,18 @@ async function runPhotoPipeline(job, photoIndex, onProgress) {
   );
 
   if (pending.length > 0) {
-    // Warm the cache with batch 1 alone, then fan out.
     await runBatch(pending[0]);
     const rest = pending.slice(1).map((batch) => () => runBatch(batch));
     await runWithConcurrency(rest, DETAILS_CONCURRENCY);
   }
 
-  // RECONCILE per photo: every index n must appear in exactly one details
-  // result. Missing items get one batch retry; still-missing items render
-  // with ingredients marked unknown and a flag, never silently dropped.
   let missing = indexItems.filter((it) => photoState.detailsByN[it.n] === undefined);
   if (missing.length > 0 && !photoState.retriedMissing) {
     photoState.retriedMissing = true;
     for (const retryBatch of batchItems(missing)) {
       try {
         await runBatch(retryBatch);
-      } catch {
-        // Fall through to flagging; a failed retry must not sink the parse.
-      }
+      } catch { /* fall through to flagging */ }
     }
     missing = indexItems.filter((it) => photoState.detailsByN[it.n] === undefined);
   }
@@ -290,12 +257,7 @@ async function runPhotoPipeline(job, photoIndex, onProgress) {
   return reconciled;
 }
 
-// ---------------------------------------------------------------------------
-// Multi-photo merge. Merge order follows photo order. Dedupe exists for
-// overlapping shots of the same page: two items merge only when the fuzzy
-// name rule AND the compatible price rule both hold. When merging, keep the
-// record with more ingredients and union the notes.
-// ---------------------------------------------------------------------------
+// ── Multi-photo merge ──
 
 function priceCompatible(a, b) {
   if (a.price === null || b.price === null) return true;
@@ -325,14 +287,12 @@ export function mergePhotos(perPhotoItems) {
   return merged;
 }
 
-// ---------------------------------------------------------------------------
-// Job driver
-// ---------------------------------------------------------------------------
+// ── Job driver ──
 
 function setState(job, state) {
   job.state = state;
   persistJob(job);
-  render(job);
+  updateProgress(job);
 }
 
 export async function startJob(files) {
@@ -348,7 +308,9 @@ export async function startJob(files) {
     error: null,
     updatedAt: Date.now(),
   };
-  render(job);
+  currentJobRef = job;
+  showProgress(job);
+  updateProgress(job);
 
   try {
     const photos = await preprocessPhotos([...files].slice(0, PHOTO_SOFT_CAP));
@@ -361,7 +323,9 @@ export async function startJob(files) {
     await driveJob(job);
   } catch (e) {
     job.error = friendlyError(e);
-    setState(job, "ERROR");
+    job.state = "ERROR";
+    persistJob(job);
+    showError(job.error);
   }
   return job;
 }
@@ -369,23 +333,25 @@ export async function startJob(files) {
 export async function resumeJob(job) {
   await loadAliases();
   if (!job.photos) {
-    // Photo bytes did not fit in localStorage; the job cannot continue
-    // without them, so surface a clean restart instead of a broken resume.
     localStorage.removeItem(JOB_KEY_PREFIX + job.jobHash);
     return null;
   }
+  currentJobRef = job;
+  showProgress(job);
   try {
     job.sessionToken = await getSessionToken();
     await driveJob(job);
   } catch (e) {
     job.error = friendlyError(e);
-    setState(job, "ERROR");
+    job.state = "ERROR";
+    persistJob(job);
+    showError(job.error);
   }
   return job;
 }
 
 async function driveJob(job) {
-  const onProgress = () => render(job);
+  const onProgress = () => updateProgress(job);
 
   setState(job, "INDEX");
   const perPhoto = [];
@@ -412,84 +378,82 @@ async function driveJob(job) {
     parsedAt: Date.now(),
   };
 
-  // Completed menus persist for the Home screen's recent list.
   const slug = (restaurant || job.jobHash.slice(0, 12)).toLowerCase().replace(/[^a-z0-9]+/g, "-");
   try {
     localStorage.setItem(MENU_KEY_PREFIX + slug, JSON.stringify(job.result));
-  } catch {
-    // Best effort.
-  }
+  } catch { /* best effort */ }
 
   setState(job, "READY");
+  showResults(job);
 }
 
 function friendlyError(e) {
   if (e && e.status === 429) return "The kitchen is slammed, try again in a bit.";
   if (e && e.status === 401) return "Session expired. Start the parse again.";
+  if (e && e.status === 413) return "Photo is too large. Try a lower resolution.";
   if (e && e.message) return e.message;
   return "Something went wrong parsing the menu. Try again.";
 }
 
-// ---------------------------------------------------------------------------
-// Interim Phase 1 rendering. Phase 2 replaces this with the real UI (cards,
-// filter sheet, Omakase). This keeps the pipeline drivable in a browser today.
-// ---------------------------------------------------------------------------
+// ── Single-item retry for flagged items ──
 
-function el(id) {
-  return document.getElementById(id);
-}
-
-function render(job) {
-  const status = el("status");
-  const results = el("results");
-  if (!status || !results) return;
-
-  if (job.state === "ERROR") {
-    status.textContent = job.error || "Something went wrong.";
-    return;
-  }
-
-  if (job.state === "READY") {
-    const flagged = job.result.items.filter((i) => i.flagged).length;
-    status.textContent = `${job.result.items.length} items` + (flagged ? `, ${flagged} flagged` : "");
-    results.innerHTML = "";
-    for (const item of job.result.items) {
-      const li = document.createElement("li");
-      const price = item.price !== null ? `$${item.price}` : (item.price_text ?? "");
-      const ingredients = (item.ingredients ?? []).map(normalizeIngredient).join(", ");
-      li.textContent = `${item.name} ${price ? `(${price})` : ""} ${ingredients ? `: ${ingredients}` : ""}${item.flagged ? " [needs retry]" : ""}`;
-      results.appendChild(li);
+async function retryItem(item) {
+  if (!currentJobRef || !currentJobRef.photos) return;
+  try {
+    const photoIndex = parseInt(item.id.split(":")[0], 10);
+    const photo = currentJobRef.photos[photoIndex];
+    if (!photo) return;
+    const result = await detailsCall(
+      currentJobRef.sessionToken,
+      photo,
+      [{ n: parseInt(item.id.split(":")[1], 10), name: item.name }],
+    );
+    const details = result.items?.[0];
+    if (details) {
+      const original = currentJobRef.result.items.find((i) => i.id === item.id);
+      if (original) {
+        original.ingredients = details.ingredients ?? [];
+        original.wrap = details.wrap ?? "unknown";
+        original.is_raw = details.is_raw ?? null;
+        original.notes = details.notes ?? null;
+        original.flagged = false;
+      }
+      showResults(currentJobRef);
     }
-    return;
+  } catch {
+    showError("Retry failed. You can fix ingredients manually.");
   }
-
-  const photoCount = job.photos?.length ?? 0;
-  const photoNo = (job.currentPhoto ?? 0) + 1;
-  const ps = job.photoStates?.[job.currentPhoto ?? 0];
-  const batches = ps?.totalBatches ? ` (${ps.completedBatches || 0}/${ps.totalBatches} batches)` : "";
-  const photoLabel = photoCount > 1 ? ` photo ${photoNo} of ${photoCount}` : "";
-  status.textContent = `${job.state.toLowerCase()}${photoLabel}${batches}...`;
 }
 
-function wireUi() {
-  const input = el("photo-input");
-  const button = el("parse-button");
-  if (!input || !button) return;
+let currentJobRef = null;
 
-  input.addEventListener("change", () => {
-    const n = input.files?.length ?? 0;
-    button.disabled = n === 0;
-    button.textContent = n > 1 ? `Parse ${Math.min(n, PHOTO_SOFT_CAP)} photos` : "Parse menu";
+// ── Init ──
+
+function wireApp() {
+  wireEvents();
+
+  onParse(() => {
+    const files = getSelectedFiles();
+    if (files.length > 0) {
+      startJob(files);
+    }
   });
 
-  button.addEventListener("click", () => {
-    if (input.files?.length) startJob(input.files);
+  onNewParse(() => {
+    showHome();
+  });
+
+  onRetryItem((item) => {
+    retryItem(item);
   });
 
   const resumable = loadResumableJob();
   if (resumable && resumable.photos) {
-    el("status").textContent = "Found an unfinished parse. Resuming...";
+    showProgress(resumable);
+    currentJobRef = resumable;
     resumeJob(resumable);
+  } else {
+    showHome();
   }
 }
 
@@ -504,8 +468,9 @@ async function checkHealth() {
 }
 
 checkHealth();
+
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", wireUi);
+  document.addEventListener("DOMContentLoaded", wireApp);
 } else {
-  wireUi();
+  wireApp();
 }
