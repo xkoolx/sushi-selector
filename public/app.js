@@ -8,6 +8,7 @@ import {
   updateProgress, wireEvents, onParse, onNewParse, onRetryItem,
   getSelectedFiles, getUrlInput,
 } from "/ui.js";
+import { aliases as aliasTable } from "/aliases.js";
 
 // ── Constants ──
 
@@ -48,17 +49,6 @@ export function tokenSortRatio(a, b) {
 }
 
 // ── Ingredient normalization ──
-
-let aliasTable = {};
-
-async function loadAliases() {
-  try {
-    const resp = await fetch("/api/aliases");
-    if (resp.ok) aliasTable = await resp.json();
-  } catch {
-    // Degrades to lowercase/plural folding.
-  }
-}
 
 export function normalizeIngredient(name) {
   let n = String(name).trim().toLowerCase();
@@ -296,8 +286,6 @@ function setState(job, state) {
 }
 
 export async function startJob(files) {
-  await loadAliases();
-
   const job = {
     state: "PREPROCESS",
     jobHash: null,
@@ -331,7 +319,6 @@ export async function startJob(files) {
 }
 
 export async function resumeJob(job) {
-  await loadAliases();
   if (!job.photos) {
     localStorage.removeItem(JOB_KEY_PREFIX + job.jobHash);
     return null;

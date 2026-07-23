@@ -50,9 +50,10 @@ export async function verifyTurnstile(env: Env, token: string, remoteIp: string 
   form.set("secret", env.TURNSTILE_SECRET_KEY);
   form.set("response", token);
   if (remoteIp) form.set("remoteip", remoteIp);
-  // idempotency_key lets a network-level retry of this verification succeed
-  // instead of being rejected as a token replay.
-  form.set("idempotency_key", crypto.randomUUID());
+  const idempotencyDigest = new Uint8Array(
+    await crypto.subtle.digest("SHA-256", encoder.encode(token)),
+  );
+  form.set("idempotency_key", base64UrlEncode(idempotencyDigest));
 
   const resp = await fetch(SITEVERIFY_URL, { method: "POST", body: form });
   if (!resp.ok) return false;
