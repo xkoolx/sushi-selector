@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["items"],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["n", "name", "ingredients", "wrap", "is_raw"],
+        "properties": {
+          "n": { "type": "integer" },
+          "name": { "type": "string" },
+          "ingredients": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "canonical lowercase singular ingredient names per the style guide"
+          },
+          "wrap": { "enum": ["nori", "soy_paper", "rice_paper", "none", "unknown"] },
+          "is_raw": { "type": ["boolean", "null"], "description": "true if the item contains raw fish, null when not determinable" },
+          "notes": { "type": ["string", "null"], "description": "modifiers or caveats printed on the menu, e.g. 'add soy paper +2'" }
+        }
+      }
+    }
+  }
+}

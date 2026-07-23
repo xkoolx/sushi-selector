@@ -278,7 +278,7 @@
         "avocado",
         "cucumber",
         "spicy tuna",
-        "eel"
+        "feep fried eel"
       ],
       "wrap": "nori",
       "is_raw": true
@@ -550,12 +550,12 @@
         "spicy tuna",
         "radish sprout",
         "yellowtail",
-        "fried garlic",
+        "garlic",
         "jalapeno"
       ],
-      "wrap": "none",
+      "wrap": "yellowtail",
       "is_raw": true,
-      "notes": "wrapped with yellowtail (no nori); no rice"
+      "notes": "wrapped with yellowtail (no nori); no rice; fried garlic"
     },
     {
       "n": 34,
@@ -634,7 +634,7 @@
         "shrimp tempura",
         "salmon"
       ],
-      "wrap": "none",
+      "wrap": "salmon",
       "is_raw": true,
       "notes": "wrapped with salmon (no nori); no rice"
     },
