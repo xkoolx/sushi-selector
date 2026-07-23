@@ -86,26 +86,57 @@ say "spicy tuna", spelled identically.
 - Lowercase, singular, trimmed: "avocado", not "Avocado" or "avocados".
 - Compound preparations are one ingredient, not a decomposition: "spicy tuna"
   is one ingredient, never "tuna" plus "spice". Same for "spicy crab",
-  "tempura shrimp" (shrimp fried in tempura), "seared tuna", "torched salmon".
-  The preparation changes what the diner is eating, so it stays in the name.
-- Normalize menu spellings to canonical names: "krab", "kani", or "crab stick"
-  become "imitation crab"; "maguro" becomes "tuna"; "hamachi" becomes
-  "yellowtail"; "unagi" becomes "eel"; "ebi" becomes "shrimp"; "tako" becomes
-  "octopus"; "tobiko" becomes "flying fish roe"; "masago" becomes "smelt roe";
-  "ikura" becomes "salmon roe"; "uni" becomes "sea urchin"; "green onion"
-  becomes "scallion"; "tempura flakes" or "crunch" become "tempura crunch".
-  When the verbatim menu spelling differs materially from the canonical name
-  (for example "krab"), preserve the verbatim spelling in notes.
+  "tempura shrimp" (shrimp fried in tempura). Seared-fish compounds stay
+  whole too: "seared tuna", "seared pepper salmon", "torched salmon". Searing
+  marks the fish as raw at the center, so the word carries is_raw evidence and
+  must never be stripped.
+- Preparation methods strip from ingredient names: "chopped scallop" becomes
+  "scallop", "deep fried eel" becomes "eel", "deep fried tofu" becomes "tofu".
+  Locked exceptions that stay whole: "pickle" (never folded into cucumber),
+  "mayo" (preferred over "mayo sauce"), "fried garlic", and "fried onion".
+  General rule: a preparation-method compound that recurs across items as a
+  named garnish reclassifies as a canonical ingredient rather than being
+  stripped. The exception list is closed (pickle, mayo, fried garlic, fried
+  onion); do not add others ad hoc. Ingredients are transcribed as printed,
+  never renamed to a category (nothing is ever labeled "crispy topping").
+- The canonical form for the roe family is the sushi-menu term, not the
+  English translation: use "masago" (not "smelt roe"), "tobiko" (not "flying
+  fish roe"), "ikura" (not "salmon roe"). These are the terms diners
+  recognize on the menu and filter by. Elsewhere the plain English filtering
+  term is canonical: "egg" (not "tamago"; tamago is a preparation of egg and
+  aliases inward to egg). "uni" becomes "sea urchin".
+- Crab is never normalized to imitation crab. "Crab" and "crab meat" stay as
+  written; only a literal "krab" or "imitation crab" on the menu maps to
+  "imitation crab".
+- Species and type qualifiers stay as printed on that item, never imported
+  from other items. An item printing "deep fried eel" yields "eel" even when
+  the same menu prints "freshwater eel" elsewhere. Never add specificity the
+  menu did not print for that item.
+- Normalize other menu spellings to canonical names: "maguro" becomes "tuna";
+  "hamachi" becomes "yellowtail"; "unagi" becomes "eel"; "ebi" becomes
+  "shrimp"; "tako" becomes "octopus"; "green onion" becomes "scallion";
+  "tempura flakes" or "crunch" become "tempura crunch".
+  When the verbatim menu spelling differs materially from the canonical name,
+  preserve the verbatim spelling in notes.
+- Vague collective terms live in notes only, never the ingredients array.
+  Terms like "various vegetables", "assorted sashimi", "seafood", and
+  "japanese vegetable" carry no filtering signal, so record them in notes
+  and leave them out of ingredients.
 - Extract only what the menu states or unambiguously shows. Do not add assumed
-  ingredients: no "rice" or "nori" on every roll, no "wasabi and ginger comes
-  with everything". If the menu says a Volcano Roll has "crab, avocado, spicy
-  mayo", those three are the ingredients, even though you know it probably
-  also contains rice.
+  ingredients. Rice is never listed as an ingredient (it is the assumed base
+  for nigiri and rolls). No "nori" in ingredients (it is the wrap field). No
+  "wasabi and ginger comes with everything". If the menu says a Volcano Roll
+  has "crab, avocado, spicy mayo", those three are the ingredients.
 - Sauces and toppings printed in the description are ingredients: "eel sauce"
   (canonical "unagi sauce"), "spicy mayo", "ponzu", "sriracha".
 - Descriptive filler is not an ingredient: "fresh", "premium", "chef's
   choice", "crispy" (alone), "delicious" all get dropped. "Crispy onion" is an
   ingredient; bare "crispy" is not.
+- Beverages are excluded: standalone drinks (sake, beer, cocktails) are not
+  menu items.
+- Ingredients for items whose components are not printed (for example a plain
+  "California Roll" with no description) may be labeled from standard sushi
+  knowledge, but must carry the literal token INFERRED in that item's notes.
 
 ## Wrap
 
@@ -116,7 +147,9 @@ The wrap field describes what holds the item together:
 - "soy_paper" when the menu states soy paper or mamenori.
 - "rice_paper" when the menu states rice paper (rare, usually fusion items).
 - "none" for nigiri, sashimi, bowls, appetizers, salads, and anything that is
-  not wrapped.
+  not wrapped. Specialty physical wraps (cucumber, avocado, fish) also use
+  "none" with a note naming the wrapper (for example "wrapped in cucumber").
+  The wrap enum never grows beyond the five values above.
 - "unknown" only when the item is a roll or wrapped thing but the wrap
   genuinely cannot be determined. Prefer "nori" for conventional rolls; save
   "unknown" for genuinely ambiguous cases like "naruto style" items you cannot
@@ -130,11 +163,16 @@ clearly does not, and null when you cannot tell.
 - Raw: nigiri and sashimi of fish, rolls containing raw fish (tuna roll,
   spicy tuna, salmon avocado), poke, tartare, roe (tobiko, masago, ikura),
   sea urchin.
-- Not raw: fully cooked proteins (shrimp except sweet shrimp, eel, crab and
-  imitation crab, chicken, beef), tempura anything, vegetable items, egg
-  omelet, octopus (conventionally cooked).
+- Not raw: fully cooked proteins (eel, crab and imitation crab, chicken,
+  beef), tempura anything, vegetable items, egg omelet. Shrimp and octopus
+  default to false (cooked) absent menu evidence to the contrary. The printed
+  item name counts as menu evidence: sweet shrimp (amaebi) and items sold as
+  live default to raw. An explicit cooking method applied to the whole item in
+  its printed name (grilled, fried, boiled) overrides the live default.
 - Cured or seared items that are still substantially raw inside (seared tuna,
-  tataki) count as raw. Sweet shrimp (amaebi) is raw.
+  tataki) count as raw. is_raw tracks whether the item as served contains raw
+  fish, not whether every component is raw (a fried amaebi head changes
+  nothing).
 - If a roll's printed ingredients leave rawness genuinely unclear, use null
   rather than guessing.
 
@@ -164,8 +202,11 @@ Knowing how sushi menus are usually laid out prevents most extraction errors:
 - Happy hour or lunch menus frequently reprint dinner items at other prices.
   Extract what this photo says, at this photo's prices; reconciling menus
   against each other is not your job.
-- Combination boxes ("Any 2 rolls $12") are one item with the printed name,
-  price as shown, and no invented ingredient list.
+- Combination boxes ("Any 2 rolls $12") are one item with the printed name
+  and price as shown. Combo choice sets: two-roll dinner combos merge both
+  rolls' inferred ingredients into the item; large choice sets (for example a
+  lunch special's 11 rolls) stay notes only; small protein choice sets
+  (roughly 5 options or fewer) enumerate all options in ingredients.
 - Asterisks and footnote daggers usually mark raw items; a footnote like
   "*consuming raw fish may increase risk" is a disclaimer line, not an item,
   but the asterisk on an item is evidence for is_raw true.

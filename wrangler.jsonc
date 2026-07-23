@@ -45,7 +45,8 @@
   "vars": {
     "MODEL": "claude-haiku-4-5-20251001",
     "TURNSTILE_SITE_KEY": "REPLACE_WITH_TURNSTILE_SITE_KEY",
-    "ALLOWED_ORIGINS": "http://localhost:8787"
+    "ALLOWED_ORIGINS": "http://localhost:8787",
+    "ALLOW_INSECURE_DEV": "false"
   },
 
   // Structured log lines per Anthropic call (token usage, cache counters,

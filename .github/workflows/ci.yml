@@ -2,9 +2,12 @@ name: CI
 
 on:
   push:
-    branches: [main, phase-1-extraction]
+    branches: [main]
   pull_request:
     branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   typecheck:
@@ -33,7 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check for leaked secrets
+        with:
+          fetch-depth: 0
+      - name: Check working tree for leaked secrets
         run: |
           if grep -rE '(sk-ant-[a-zA-Z0-9]{10,}|ANTHROPIC_API_KEY|TURNSTILE_SECRET_KEY|SESSION_HMAC_SECRET)\s*=' \
             --include='*.ts' --include='*.js' --include='*.json' --include='*.jsonc' \
@@ -42,4 +47,13 @@ jobs:
             echo "::error::Secret reference found in source files"
             exit 1
           fi
-          echo "Clean"
+          echo "Working tree clean"
+      - name: Check git history for leaked secrets
+        run: |
+          if git log -p --all -- '*.ts' '*.js' '*.json' '*.jsonc' '*.yaml' '*.yml' | \
+            grep -E '(sk-ant-[a-zA-Z0-9]{10,}|ANTHROPIC_API_KEY|TURNSTILE_SECRET_KEY|SESSION_HMAC_SECRET)\s*=' | \
+            grep -v '^\-' | head -5; then
+            echo "::error::Secret reference found in git history"
+            exit 1
+          fi
+          echo "Git history clean"

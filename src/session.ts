@@ -39,10 +39,12 @@ async function hmacKey(secret: string, usages: ("sign" | "verify")[]): Promise<C
 
 export async function verifyTurnstile(env: Env, token: string, remoteIp: string | null): Promise<boolean> {
   if (!env.TURNSTILE_SECRET_KEY) {
-    // Local development before Tom's Turnstile preflight (DEPLOY.md). The
-    // production deploy carries the secret, so this branch never runs there.
-    console.log(JSON.stringify({ event: "turnstile_skipped", reason: "no_secret_configured" }));
-    return true;
+    if ((env as Record<string, unknown>).ALLOW_INSECURE_DEV === "true") {
+      console.log(JSON.stringify({ event: "turnstile_skipped", reason: "ALLOW_INSECURE_DEV" }));
+      return true;
+    }
+    console.error(JSON.stringify({ event: "turnstile_blocked", reason: "no_secret_configured" }));
+    return false;
   }
   const form = new URLSearchParams();
   form.set("secret", env.TURNSTILE_SECRET_KEY);
