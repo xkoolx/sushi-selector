@@ -215,7 +215,8 @@ tool enabled so Anthropic's infrastructure fetches the page (no CORS, no
 fetching arbitrary sites from the worker). The user message contains the URL
 and the combined task instruction; structured output is constrained to a
 combined schema (the details item shape plus section, price_text, and price
-per item, and the sections array). max_tokens 8192. Cap fetched content with
+per item, the sections array, and a nullable restaurant_name at the top
+level). max_tokens 8192. Cap fetched content with
 the tool's content token limit parameter. Verify the current web fetch tool
 name, beta header, and parameters against live docs at build time.
 

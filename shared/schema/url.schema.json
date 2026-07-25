@@ -20,7 +20,7 @@
         "additionalProperties": false,
         "required": ["n", "name", "section", "price_text", "price", "ingredients", "wrap", "is_raw"],
         "properties": {
-          "n": { "type": "integer", "description": "1-based reading-order index" },
+          "n": { "type": "integer", "description": "1-based reading-order index, stable across passes" },
           "name": { "type": "string" },
           "section": { "type": ["string", "null"] },
           "price_text": { "type": ["string", "null"], "description": "verbatim price text, e.g. '14.95', 'MP', '8/15'" },
@@ -32,7 +32,7 @@
           },
           "wrap": { "enum": ["nori", "soy_paper", "rice_paper", "none", "unknown"] },
           "is_raw": { "type": ["boolean", "null"], "description": "true if the item contains raw fish, null when not determinable" },
-          "notes": { "type": ["string", "null"], "description": "modifiers or caveats printed on the menu" }
+          "notes": { "type": ["string", "null"], "description": "modifiers or caveats printed on the menu, e.g. 'add soy paper +2'" }
         }
       }
     }

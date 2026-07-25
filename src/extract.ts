@@ -1,261 +1,450 @@
-// Anthropic request construction behind a provider seam (PLAN R-4: a Gemini
-// adapter is post-MVP and slots in behind ExtractionProvider). The worker
-// stays a thin proxy: it never decodes the image, it moves the base64 string
-// from the client request into the Anthropic payload untouched.
+// Anthropic request construction for the three extraction passes: index,
+// details, and the combined URL pass. This is the intelligence-adjacent
+// glue: the actual intelligence lives in shared/prompts/ and shared/schema/,
+// imported here verbatim, never duplicated. Not yet wired into worker.ts's
+// router; that lands with the session and rate-limit modules.
 
+// Wrangler's esbuild bundler resolves .json imports via esbuild's built-in
+// JSON loader (no wrangler.jsonc rule needed) and .md imports as raw text
+// via the wrangler.jsonc "rules" entry added alongside this file; both work
+// at build time with zero further config. tsc, run standalone, has no
+// loader for .md and reports TS2307. The standard fix is an ambient
+// wildcard module declaration (`declare module "*.md"`), but this
+// TypeScript version (7.0.2) only accepts that from a file with no
+// top-level import/export of its own, i.e. a separate .d.ts, which is out
+// of scope here (only this file is authorized this session). Suppressing
+// per import is the in-file alternative: wrangler's own build (esbuild)
+// never runs tsc's type checker, so this has no effect on the bundle, only
+// on standalone `tsc --noEmit` runs.
 import systemPrompt from "../shared/prompts/system.md";
-import indexTask from "../shared/prompts/index-task.md";
-import detailsTask from "../shared/prompts/details-task.md";
-import urlTask from "../shared/prompts/url-task.md";
+import indexTaskPrompt from "../shared/prompts/index-task.md";
+import detailsTaskPrompt from "../shared/prompts/details-task.md";
+import urlTaskPrompt from "../shared/prompts/url-task.md";
 import indexSchema from "../shared/schema/index.schema.json";
 import detailsSchema from "../shared/schema/details.schema.json";
 import urlSchema from "../shared/schema/url.schema.json";
 
-import type { Env } from "./worker";
+// --------------------------------------------------------------------------
+// Constants: model and max_tokens are pinned server-side per SPEC.md's
+// blast-radius control. Never accept either from a caller.
+// --------------------------------------------------------------------------
 
-export interface ImagePayload {
-  media_type: string;
-  data: string;
-}
+const DEFAULT_MODEL = "claude-haiku-4-5-20251001";
+const INDEX_MAX_TOKENS = 2048;
+const DETAILS_MAX_TOKENS = 2048;
+const URL_MAX_TOKENS = 8192;
+const DETAILS_MAX_ITEMS = 10;
 
-export interface DetailsItemRef {
-  n: number;
-  name: string;
-}
+const ANTHROPIC_MESSAGES_URL = "https://api.anthropic.com/v1/messages";
+const ANTHROPIC_VERSION = "2023-06-01";
 
-export type ExtractRequest =
-  | { kind: "index"; image?: ImagePayload; url?: string }
-  | { kind: "details"; image?: ImagePayload; url?: string; items: DetailsItemRef[] }
-  | { kind: "url"; url: string };
+// Basic web fetch, not a dynamic-filtering _202602xx variant: those are
+// verified (live docs, this session) to support Fable 5, Opus 4.8, Mythos
+// 5/Preview, Opus 4.7, Opus 4.6, Sonnet 5, and Sonnet 4.6 only. Haiku 4.5,
+// the default model here, is not on that list, so the basic tool is the
+// correct choice for the pinned default model. GA, no beta header required.
+const WEB_FETCH_TOOL_TYPE = "web_fetch_20250910";
+const WEB_FETCH_MAX_USES = 3;
+const WEB_FETCH_MAX_CONTENT_TOKENS = 100_000;
 
-export interface ExtractUsage {
+// --------------------------------------------------------------------------
+// Public types
+// --------------------------------------------------------------------------
+
+export interface Usage {
   input_tokens: number;
   output_tokens: number;
   cache_creation_input_tokens: number;
   cache_read_input_tokens: number;
 }
 
-export interface ExtractResult {
-  json: Record<string, unknown>;
-  usage: ExtractUsage;
-  stop_reason: string | null;
+export interface ExtractionResult {
+  data: unknown;
+  usage: Usage;
 }
 
-export class ExtractError extends Error {
-  status: number;
-  code: string;
-  constructor(status: number, code: string, message: string) {
-    super(message);
-    this.status = status;
-    this.code = code;
-  }
+export interface ImageInput {
+  media_type: string;
+  data: string; // base64
 }
+
+export interface DetailsItem {
+  n: number;
+  name: string;
+}
+
+// json_schema is the primary path (verified: Haiku 4.5 supports
+// output_config.format). strict_tool is the fallback SPEC.md requires, kept
+// reachable through this real constructor parameter rather than described
+// and never exercised.
+export type OutputMode = "json_schema" | "strict_tool";
 
 export interface ExtractionProvider {
-  extract(req: ExtractRequest, env: Env): Promise<ExtractResult>;
+  runIndex(image: ImageInput, model: string): Promise<ExtractionResult>;
+  runDetails(
+    image: ImageInput,
+    items: DetailsItem[],
+    model: string,
+  ): Promise<ExtractionResult>;
+  runUrl(url: string, model: string): Promise<ExtractionResult>;
 }
 
-const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
-const ANTHROPIC_VERSION = "2023-06-01";
+export interface ExtractEnv {
+  ANTHROPIC_API_KEY?: string;
+  MODEL?: string;
+}
 
-// Basic web fetch variant: the newer dynamic-filtering variants require
-// Opus or Sonnet tier models, and the pinned model is Haiku 4.5. GA, no
-// beta header (verified against live docs at build time).
-const WEB_FETCH_TOOL = {
-  type: "web_fetch_20250910",
-  name: "web_fetch",
-  max_uses: 3,
-  max_content_tokens: 40000,
-};
+export function resolveModel(env: ExtractEnv): string {
+  return env.MODEL || DEFAULT_MODEL;
+}
 
-type ContentBlock = Record<string, unknown>;
+export function createExtractionProvider(
+  env: ExtractEnv,
+  outputMode: OutputMode = "json_schema",
+): AnthropicExtractionProvider {
+  if (!env.ANTHROPIC_API_KEY) {
+    throw new Error("ANTHROPIC_API_KEY is not set");
+  }
+  return new AnthropicExtractionProvider(env.ANTHROPIC_API_KEY, outputMode);
+}
 
-function imageBlock(image: ImagePayload): ContentBlock {
-  // The cache breakpoint lives on the image block so every details call for
-  // the same photo reads the (system prompt + image) prefix at the cached
-  // rate. system.md is sized so the prefix clears Haiku's 4,096 token floor.
+// --------------------------------------------------------------------------
+// Anthropic wire types (only the fields this file reads or writes)
+// --------------------------------------------------------------------------
+
+interface AnthropicImageBlock {
+  type: "image";
+  source: { type: "base64"; media_type: string; data: string };
+  cache_control?: { type: "ephemeral" };
+}
+
+interface AnthropicTextBlock {
+  type: "text";
+  text: string;
+}
+
+type AnthropicContentBlockParam = AnthropicImageBlock | AnthropicTextBlock;
+
+interface AnthropicMessageParam {
+  role: "user" | "assistant";
+  content: string | AnthropicContentBlockParam[] | unknown[];
+}
+
+interface AnthropicToolDef {
+  type?: string;
+  name: string;
+  description?: string;
+  input_schema?: Record<string, unknown>;
+  strict?: boolean;
+  max_uses?: number;
+  max_content_tokens?: number;
+}
+
+interface AnthropicRequestBody {
+  model: string;
+  max_tokens: number;
+  system: string;
+  messages: AnthropicMessageParam[];
+  output_config?: { format: { type: "json_schema"; schema: Record<string, unknown> } };
+  tools?: AnthropicToolDef[];
+  tool_choice?: { type: "tool" | "auto" | "any"; name?: string };
+}
+
+interface AnthropicUsageWire {
+  input_tokens: number;
+  output_tokens: number;
+  cache_creation_input_tokens?: number;
+  cache_read_input_tokens?: number;
+}
+
+interface AnthropicContentBlockWire {
+  type: string;
+  text?: string;
+  input?: unknown;
+  name?: string;
+  id?: string;
+}
+
+interface AnthropicMessageResponse {
+  content: AnthropicContentBlockWire[];
+  usage: AnthropicUsageWire;
+  stop_reason: string;
+}
+
+function normalizeUsage(u: AnthropicUsageWire): Usage {
+  return {
+    input_tokens: u.input_tokens,
+    output_tokens: u.output_tokens,
+    cache_creation_input_tokens: u.cache_creation_input_tokens ?? 0,
+    cache_read_input_tokens: u.cache_read_input_tokens ?? 0,
+  };
+}
+
+function sumUsage(a: Usage, b: Usage): Usage {
+  return {
+    input_tokens: a.input_tokens + b.input_tokens,
+    output_tokens: a.output_tokens + b.output_tokens,
+    cache_creation_input_tokens:
+      a.cache_creation_input_tokens + b.cache_creation_input_tokens,
+    cache_read_input_tokens: a.cache_read_input_tokens + b.cache_read_input_tokens,
+  };
+}
+
+// Strict tool schemas require additionalProperties: false at every object
+// level the API validates; the shared schemas already set this at the top
+// level and on nested item objects, so a shallow spread is sufficient here.
+function toStrictInputSchema(schema: Record<string, unknown>): Record<string, unknown> {
+  return { ...schema, additionalProperties: false };
+}
+
+function imageBlock(image: ImageInput): AnthropicImageBlock {
   return {
     type: "image",
-    source: {
-      type: "base64",
-      media_type: image.media_type,
-      data: image.data,
-    },
+    source: { type: "base64", media_type: image.media_type, data: image.data },
     cache_control: { type: "ephemeral" },
   };
 }
 
-function buildBody(req: ExtractRequest, env: Env): Record<string, unknown> {
-  const base: Record<string, unknown> = {
-    model: env.MODEL,
-    system: [{ type: "text", text: systemPrompt }],
-  };
+// --------------------------------------------------------------------------
+// Anthropic implementation
+// --------------------------------------------------------------------------
 
-  const useUrl = "url" in req && typeof req.url === "string" && req.kind !== "url" && !("image" in req && req.image);
+export class AnthropicExtractionProvider implements ExtractionProvider {
+  constructor(
+    private readonly apiKey: string,
+    private readonly outputMode: OutputMode = "json_schema",
+  ) {}
 
-  if (req.kind === "index") {
-    base.max_tokens = 2048;
-    base.output_config = { format: { type: "json_schema", schema: indexSchema } };
-    if (useUrl) {
-      base.tools = [WEB_FETCH_TOOL];
-      base.messages = [
-        { role: "user", content: [{ type: "text", text: `${indexTask}\n\nMenu URL:\n${req.url}` }] },
-      ];
-    } else {
-      base.messages = [
-        { role: "user", content: [imageBlock(req.image!), { type: "text", text: indexTask }] },
-      ];
-    }
-  } else if (req.kind === "details") {
-    base.max_tokens = 2048;
-    base.output_config = { format: { type: "json_schema", schema: detailsSchema } };
-    const itemList = JSON.stringify(req.items);
-    if (useUrl) {
-      base.tools = [WEB_FETCH_TOOL];
-      base.messages = [
-        { role: "user", content: [{ type: "text", text: `${detailsTask}${itemList}\n\nMenu URL:\n${req.url}` }] },
-      ];
-    } else {
-      base.messages = [
-        { role: "user", content: [imageBlock(req.image!), { type: "text", text: `${detailsTask}${itemList}` }] },
-      ];
-    }
-  } else {
-    base.max_tokens = 8192;
-    base.output_config = { format: { type: "json_schema", schema: urlSchema } };
-    base.tools = [WEB_FETCH_TOOL];
-    base.messages = [
-      { role: "user", content: [{ type: "text", text: `${urlTask}${req.url}` }] },
-    ];
+  async runIndex(image: ImageInput, model: string): Promise<ExtractionResult> {
+    const body = this.buildImagePassBody(
+      image,
+      indexTaskPrompt,
+      indexSchema as Record<string, unknown>,
+      "index_extraction",
+      INDEX_MAX_TOKENS,
+      model,
+    );
+    return this.send(body, "index_extraction", "index");
   }
 
-  return base;
-}
-
-function emptyUsage(): ExtractUsage {
-  return {
-    input_tokens: 0,
-    output_tokens: 0,
-    cache_creation_input_tokens: 0,
-    cache_read_input_tokens: 0,
-  };
-}
-
-function addUsage(total: ExtractUsage, u: Record<string, unknown> | undefined): void {
-  if (!u) return;
-  for (const key of Object.keys(total) as (keyof ExtractUsage)[]) {
-    const v = u[key];
-    if (typeof v === "number") total[key] += v;
-  }
-}
-
-function lastTextBlock(content: unknown): string | null {
-  if (!Array.isArray(content)) return null;
-  for (let i = content.length - 1; i >= 0; i--) {
-    const block = content[i] as ContentBlock;
-    if (block && block.type === "text" && typeof block.text === "string") {
-      return block.text;
+  async runDetails(
+    image: ImageInput,
+    items: DetailsItem[],
+    model: string,
+  ): Promise<ExtractionResult> {
+    if (items.length > DETAILS_MAX_ITEMS) {
+      throw new Error(
+        `details pass accepts at most ${DETAILS_MAX_ITEMS} items, got ${items.length}`,
+      );
     }
+    const batchText = JSON.stringify(items.map((i) => ({ n: i.n, name: i.name })));
+    const taskText = `${detailsTaskPrompt}\n\nItems for this batch:\n${batchText}`;
+    const body = this.buildImagePassBody(
+      image,
+      taskText,
+      detailsSchema as Record<string, unknown>,
+      "details_extraction",
+      DETAILS_MAX_TOKENS,
+      model,
+    );
+    return this.send(body, "details_extraction", "details");
   }
-  return null;
-}
 
-export const anthropicProvider: ExtractionProvider = {
-  async extract(req: ExtractRequest, env: Env): Promise<ExtractResult> {
-    if (!env.ANTHROPIC_API_KEY) {
-      throw new ExtractError(500, "not_configured", "ANTHROPIC_API_KEY is not set (see docs/DEPLOY.md)");
-    }
+  async runUrl(url: string, model: string): Promise<ExtractionResult> {
+    const userText = `${url}\n\n${urlTaskPrompt}`;
+    const webFetchTool: AnthropicToolDef = {
+      type: WEB_FETCH_TOOL_TYPE,
+      name: "web_fetch",
+      max_uses: WEB_FETCH_MAX_USES,
+      max_content_tokens: WEB_FETCH_MAX_CONTENT_TOKENS,
+      // citations stay off: output_config.format (structured outputs) is
+      // documented incompatible with citations and returns a 400.
+    };
 
-    const body = buildBody(req, env);
-    const usage = emptyUsage();
-    const started = Date.now();
-
-    let stopReason: string | null = null;
-    let content: unknown = null;
-
-    // Server-side tool use (web fetch) can pause the turn; resume up to twice.
-    // Image calls never pause, so this loop runs once for the photo path.
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const resp = await fetch(ANTHROPIC_URL, {
-        method: "POST",
-        headers: {
-          "x-api-key": env.ANTHROPIC_API_KEY,
-          "anthropic-version": ANTHROPIC_VERSION,
-          "content-type": "application/json",
+    if (this.outputMode === "json_schema") {
+      const body: AnthropicRequestBody = {
+        model,
+        max_tokens: URL_MAX_TOKENS,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userText }],
+        tools: [webFetchTool],
+        output_config: {
+          format: { type: "json_schema", schema: urlSchema as Record<string, unknown> },
         },
-        body: JSON.stringify(body),
-      });
-
-      if (!resp.ok) {
-        const text = await resp.text();
-        log(env, req.kind, env.MODEL, Date.now() - started, usage, null, `http_${resp.status}`);
-        if (resp.status === 429) {
-          throw new ExtractError(429, "upstream_rate_limited", "The kitchen is slammed, try again in a bit.");
-        }
-        throw new ExtractError(502, "upstream_error", `Anthropic API error ${resp.status}: ${text.slice(0, 300)}`);
-      }
-
-      const message = (await resp.json()) as Record<string, unknown>;
-      addUsage(usage, message.usage as Record<string, unknown> | undefined);
-      stopReason = (message.stop_reason as string | null) ?? null;
-      content = message.content;
-
-      if (stopReason !== "pause_turn") break;
-      const messages = body.messages as unknown[];
-      messages.push({ role: "assistant", content });
+      };
+      return this.send(body, "url_extraction", "url");
     }
 
-    const latency = Date.now() - started;
+    // strict_tool mode: forcing a single tool via tool_choice precludes
+    // Claude from also calling web_fetch in the same turn, so this runs as
+    // two calls. Call A lets the server tool resolve; call B forces the
+    // extraction tool over the now-fetched content. Not specified in
+    // SPEC.md (which only names the primary path for the URL pass); this
+    // two-call shape is this session's inferred design for making the
+    // fallback actually work rather than merely described.
+    const startedAt = Date.now();
+    const fetchBody: AnthropicRequestBody = {
+      model,
+      max_tokens: URL_MAX_TOKENS,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userText }],
+      tools: [webFetchTool],
+    };
+    const fetchResponse = await this.request(fetchBody);
+    logCall("url_extraction_fetch", model, normalizeUsage(fetchResponse.usage), startedAt, "success");
 
-    if (stopReason === "refusal") {
-      log(env, req.kind, env.MODEL, latency, usage, stopReason, "refusal");
-      throw new ExtractError(502, "refused", "The model declined this request.");
+    const extractStartedAt = Date.now();
+    const extractionTool: AnthropicToolDef = {
+      name: "url_extraction",
+      description: "Return the structured menu extraction for the fetched page.",
+      input_schema: toStrictInputSchema(urlSchema as Record<string, unknown>),
+      strict: true,
+    };
+    const extractBody: AnthropicRequestBody = {
+      model,
+      max_tokens: URL_MAX_TOKENS,
+      system: systemPrompt,
+      messages: [
+        { role: "user", content: userText },
+        { role: "assistant", content: fetchResponse.content as unknown[] },
+        {
+          role: "user",
+          content: "Now return the structured extraction for the fetched page.",
+        },
+      ],
+      tools: [extractionTool],
+      tool_choice: { type: "tool", name: "url_extraction" },
+    };
+    const extractResponse = await this.request(extractBody);
+    logCall(
+      "url_extraction",
+      model,
+      normalizeUsage(extractResponse.usage),
+      extractStartedAt,
+      "success",
+    );
+
+    const data = extractFromToolUse(extractResponse, "url_extraction");
+    const usage = sumUsage(normalizeUsage(fetchResponse.usage), normalizeUsage(extractResponse.usage));
+    return { data, usage };
+  }
+
+  private buildImagePassBody(
+    image: ImageInput,
+    taskText: string,
+    schema: Record<string, unknown>,
+    schemaName: string,
+    maxTokens: number,
+    model: string,
+  ): AnthropicRequestBody {
+    const messages: AnthropicMessageParam[] = [
+      {
+        role: "user",
+        content: [imageBlock(image), { type: "text", text: taskText }],
+      },
+    ];
+
+    if (this.outputMode === "json_schema") {
+      return {
+        model,
+        max_tokens: maxTokens,
+        system: systemPrompt,
+        messages,
+        output_config: { format: { type: "json_schema", schema } },
+      };
     }
 
-    const text = lastTextBlock(content);
-    if (text === null) {
-      log(env, req.kind, env.MODEL, latency, usage, stopReason, "no_text");
-      throw new ExtractError(502, "extract_failed", "Model response contained no text output.");
-    }
+    return {
+      model,
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages,
+      tools: [
+        {
+          name: schemaName,
+          description: `Return the structured extraction for the ${schemaName.replace("_extraction", "")} pass.`,
+          input_schema: toStrictInputSchema(schema),
+          strict: true,
+        },
+      ],
+      tool_choice: { type: "tool", name: schemaName },
+    };
+  }
 
-    let json: Record<string, unknown>;
+  private async send(
+    body: AnthropicRequestBody,
+    schemaName: string,
+    endpoint: string,
+  ): Promise<ExtractionResult> {
+    const startedAt = Date.now();
+    let response: AnthropicMessageResponse;
     try {
-      json = JSON.parse(text) as Record<string, unknown>;
-    } catch {
-      log(env, req.kind, env.MODEL, latency, usage, stopReason, "parse_failed");
-      throw new ExtractError(502, "schema_parse_failed", "Model output failed JSON parsing.");
+      response = await this.request(body);
+    } catch (err) {
+      logCall(endpoint, body.model, null, startedAt, "error");
+      throw err;
     }
+    const usage = normalizeUsage(response.usage);
+    logCall(endpoint, body.model, usage, startedAt, "success");
 
-    log(env, req.kind, env.MODEL, latency, usage, stopReason, "ok");
-    return { json, usage, stop_reason: stopReason };
-  },
-};
+    const data =
+      this.outputMode === "json_schema"
+        ? extractFromText(response)
+        : extractFromToolUse(response, schemaName);
+    return { data, usage };
+  }
 
-// One structured JSON log line per Anthropic call (SPEC: cost and cache
-// behavior must be auditable from logs alone). Zero cache reads on details
-// calls after the first for a photo means caching is broken; the eval
-// harness and dashboard queries key on these fields.
-function log(
-  env: Env,
+  private async request(body: AnthropicRequestBody): Promise<AnthropicMessageResponse> {
+    const res = await fetch(ANTHROPIC_MESSAGES_URL, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": this.apiKey,
+        "anthropic-version": ANTHROPIC_VERSION,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Anthropic API error ${res.status}: ${text}`);
+    }
+    return (await res.json()) as AnthropicMessageResponse;
+  }
+}
+
+function extractFromText(response: AnthropicMessageResponse): unknown {
+  const block = response.content.find((b) => b.type === "text");
+  if (!block || typeof block.text !== "string") {
+    throw new Error("no text block in Anthropic response (json_schema mode)");
+  }
+  return JSON.parse(block.text);
+}
+
+function extractFromToolUse(response: AnthropicMessageResponse, name: string): unknown {
+  const block = response.content.find((b) => b.type === "tool_use" && b.name === name);
+  if (!block) {
+    throw new Error(`no tool_use block named '${name}' in Anthropic response (strict_tool mode)`);
+  }
+  return block.input;
+}
+
+// One structured JSON log line per Anthropic call, per SPEC.md's logging
+// requirement, emitted at the call site since it is not yet wired through
+// worker.ts's per-request logging.
+function logCall(
   endpoint: string,
   model: string,
-  latencyMs: number,
-  usage: ExtractUsage,
-  stopReason: string | null,
-  outcome: string,
+  usage: Usage | null,
+  startedAt: number,
+  outcome: "success" | "error",
 ): void {
   console.log(
     JSON.stringify({
-      event: "anthropic_call",
       endpoint,
       model,
-      latency_ms: latencyMs,
-      stop_reason: stopReason,
+      usage,
+      latency_ms: Date.now() - startedAt,
       outcome,
-      input_tokens: usage.input_tokens,
-      output_tokens: usage.output_tokens,
-      cache_creation_input_tokens: usage.cache_creation_input_tokens,
-      cache_read_input_tokens: usage.cache_read_input_tokens,
     }),
   );
 }

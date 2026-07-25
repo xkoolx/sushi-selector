@@ -95,7 +95,7 @@ Every box must be demonstrably checkable before declaring the project done.
 
 ## Tom's preflight (human tasks, cannot be delegated)
 
-docs/RUNBOOK.md walks every step below in order with exact commands. Summary:
+Summary:
 
 1. Collect 6 to 10 real menu photos per the guidance in EVALS.md and place
    them in evals/menus/raw/.

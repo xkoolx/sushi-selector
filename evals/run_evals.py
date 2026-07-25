@@ -1,7 +1,7 @@
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [
-#   "anthropic>=0.92",
+#   "anthropic>=0.40",
 #   "rapidfuzz>=3.9",
 # ]
 # ///
@@ -23,23 +23,27 @@ Run with uv (never pip or python directly):
     uv run evals/run_evals.py --all --batch        # route via Message Batches API (50% cheaper)
     uv run evals/run_evals.py --url-smoke          # loose URL-path smoke checks (reported, not gated)
 
-STATUS: Phase 1. The extraction pipeline is wired and mirrors the production
-request shapes exactly: system prompt from shared/prompts/, structured outputs
-constrained to shared/schema/, prompt caching with the breakpoint on the image
-block, and warm-then-fan-out details scheduling. Scored runs require
-ANTHROPIC_API_KEY in the environment and spend real credits.
+STATUS: Phase 1 request layer wired. The deterministic layer (asset loading,
+menu discovery, matching, metrics, gates, reporting) and the extraction
+pipeline (index/details/reconcile/merge, --batch, --url-smoke) are both
+implemented. Nothing runs without an explicit --menu/--all/--batch/--url-smoke
+invocation and a real ANTHROPIC_API_KEY in the environment; --check stays
+fully offline regardless.
 """
 
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 import sys
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
+import anthropic
 from rapidfuzz.fuzz import token_sort_ratio
 
 # --------------------------------------------------------------------------
@@ -58,6 +62,22 @@ DEFAULT_MODEL = "claude-haiku-4-5-20251001"
 
 # Name-match threshold, shared with the client dedupe rule (SPEC.md).
 NAME_MATCH_THRESHOLD = 85
+
+# Anthropic request-shape constants, mirroring src/extract.ts exactly so
+# evals exercise the same request shapes production sends.
+INDEX_MAX_TOKENS = 2048
+DETAILS_MAX_TOKENS = 2048
+URL_MAX_TOKENS = 8192
+DETAILS_BATCH_SIZE = 8  # SPEC.md: batch 1 fires solo to warm the cache, then
+                         # the rest fan out (sequential here; see _run_photo_pipeline).
+
+# Basic web fetch, not a dynamic-filtering _202602xx variant: those are
+# verified (live docs, this session) to support Fable 5, Opus 4.8, Mythos
+# 5/Preview, Opus 4.7, Opus 4.6, Sonnet 5, and Sonnet 4.6 only. Haiku 4.5,
+# the default model here, is not on that list. GA, no beta header required.
+WEB_FETCH_TOOL_TYPE = "web_fetch_20250910"
+WEB_FETCH_MAX_USES = 3
+WEB_FETCH_MAX_CONTENT_TOKENS = 100_000
 
 # Gate thresholds (docs/EVALS.md). Kept here so the report can print the exact
 # number each gate was measured against.
@@ -93,6 +113,7 @@ class SharedAssets:
     url_task: Optional[str]
     index_schema: dict
     details_schema: dict
+    url_schema: Optional[dict]
     aliases: dict[str, str]
 
 
@@ -135,6 +156,11 @@ def load_shared_assets() -> SharedAssets:
     else:
         missing.append(str(details_schema_path.relative_to(REPO_ROOT)))
 
+    url_schema_path = SCHEMA_DIR / "url.schema.json"
+    url_schema: Optional[dict] = (
+        json.loads(_read_text(url_schema_path)) if url_schema_path.exists() else None
+    )
+
     aliases: dict[str, str] = {}
     if ALIASES_PATH.exists():
         aliases = json.loads(_read_text(ALIASES_PATH))
@@ -151,6 +177,7 @@ def load_shared_assets() -> SharedAssets:
         url_task=url_task,
         index_schema=index_schema,
         details_schema=details_schema,
+        url_schema=url_schema,
         aliases=aliases,
     )
 
@@ -216,9 +243,7 @@ def normalize_ingredient(name: str, aliases: dict[str, str]) -> str:
     return aliases.get(n, n)
 
 
-def normalize_name(name: Optional[str]) -> str:
-    if not isinstance(name, str):
-        return ""
+def normalize_name(name: str) -> str:
     return " ".join(name.strip().lower().split())
 
 
@@ -387,7 +412,7 @@ def score_menu(slug: str, pred: list[dict], gold: list[dict], aliases: dict[str,
 
 
 # --------------------------------------------------------------------------
-# Extraction pipeline (Phase 1: mirrors production request shapes)
+# Extraction pipeline
 # --------------------------------------------------------------------------
 
 
@@ -398,337 +423,372 @@ class Usage:
     cache_creation_input_tokens: int = 0
     cache_read_input_tokens: int = 0
 
-    def add(self, message_usage: Any) -> None:
-        for f_ in (
-            "input_tokens",
-            "output_tokens",
-            "cache_creation_input_tokens",
-            "cache_read_input_tokens",
-        ):
-            v = getattr(message_usage, f_, None)
-            if isinstance(v, int):
-                setattr(self, f_, getattr(self, f_) + v)
+
+@dataclass
+class CallUsage:
+    """One Anthropic call's usage, tagged by menu, photo, and kind.
+
+    The kind tag lets the report distinguish the cache-warming details call
+    (batch 1) from the calls that should read from cache (batch 2+), per
+    SPEC.md's caching requirement and the named bug check in write_report.
+    """
+
+    menu_slug: str
+    photo_index: int
+    kind: str  # index | details_batch_1 | details_batch_n | details_retry
+    usage: Usage
 
 
-DETAILS_BATCH_SIZE = 8
-DETAILS_CONCURRENCY = 3
-MEDIA_TYPES = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png"}
-
-# Basic web fetch variant: the dynamic-filtering variants require Opus or
-# Sonnet tier models and the pinned model is Haiku 4.5. Matches src/extract.ts.
-WEB_FETCH_TOOL = {
-    "type": "web_fetch_20250910",
-    "name": "web_fetch",
-    "max_uses": 3,
-    "max_content_tokens": 40000,
-}
+def _sum_usage(call_usages: list[CallUsage]) -> Usage:
+    total = Usage()
+    for c in call_usages:
+        total.input_tokens += c.usage.input_tokens
+        total.output_tokens += c.usage.output_tokens
+        total.cache_creation_input_tokens += c.usage.cache_creation_input_tokens
+        total.cache_read_input_tokens += c.usage.cache_read_input_tokens
+    return total
 
 
-def _photo_block(photo: Path) -> dict:
-    import base64
+def _media_type_for(path: Path) -> str:
+    suffix = path.suffix.lower()
+    if suffix in (".jpg", ".jpeg"):
+        return "image/jpeg"
+    if suffix == ".png":
+        return "image/png"
+    raise ValueError(f"unsupported image type: {path}")
 
-    media = MEDIA_TYPES.get(photo.suffix.lower())
-    if media is None:
-        raise ValueError(f"unsupported photo type: {photo}")
+
+def _image_block(photo: Path) -> dict:
+    """Image-first content block with a prompt-cache breakpoint.
+
+    Mirrors src/extract.ts's imageBlock() exactly: same source shape, same
+    cache_control placement.
+    """
     data = base64.b64encode(photo.read_bytes()).decode("ascii")
-    # The cache breakpoint lives on the image block, exactly as in
-    # src/extract.ts, so details calls read (system + image) at the cached
-    # rate once the warm call has landed.
     return {
         "type": "image",
-        "source": {"type": "base64", "media_type": media, "data": data},
+        "source": {"type": "base64", "media_type": _media_type_for(photo), "data": data},
         "cache_control": {"type": "ephemeral"},
     }
 
 
-def _index_params(assets: SharedAssets, model: str, image_block: dict) -> dict:
+def _usage_from_response(resp: Any) -> Usage:
+    u = resp.usage
+    return Usage(
+        input_tokens=u.input_tokens,
+        output_tokens=u.output_tokens,
+        cache_creation_input_tokens=getattr(u, "cache_creation_input_tokens", 0) or 0,
+        cache_read_input_tokens=getattr(u, "cache_read_input_tokens", 0) or 0,
+    )
+
+
+def _extract_json(resp: Any) -> dict:
+    """Read json_schema-mode structured output: the first text block,
+    JSON-parsed. output_config.format constrains generation, it does not
+    change the response envelope (verified against live docs this session).
+    """
+    for block in resp.content:
+        if block.type == "text":
+            return json.loads(block.text)
+    raise RuntimeError("no text block in Anthropic response")
+
+
+def _index_params(assets: SharedAssets, photo: Path, model: str) -> dict:
     return {
         "model": model,
-        "max_tokens": 2048,
-        "system": [{"type": "text", "text": assets.system_prompt}],
+        "max_tokens": INDEX_MAX_TOKENS,
+        "system": assets.system_prompt,
         "messages": [
             {
                 "role": "user",
-                "content": [image_block, {"type": "text", "text": assets.index_task}],
+                "content": [_image_block(photo), {"type": "text", "text": assets.index_task}],
             }
         ],
         "output_config": {"format": {"type": "json_schema", "schema": assets.index_schema}},
     }
 
 
-def _details_params(
-    assets: SharedAssets, model: str, image_block: dict, items: list[dict]
-) -> dict:
-    refs = [{"n": it["n"], "name": it["name"]} for it in items]
+def _details_params(assets: SharedAssets, photo: Path, batch_items: list[dict], model: str) -> dict:
+    task_text = assets.details_task + "\n\nItems for this batch:\n" + json.dumps(
+        [{"n": it["n"], "name": it["name"]} for it in batch_items]
+    )
     return {
         "model": model,
-        "max_tokens": 2048,
-        "system": [{"type": "text", "text": assets.system_prompt}],
+        "max_tokens": DETAILS_MAX_TOKENS,
+        "system": assets.system_prompt,
         "messages": [
             {
                 "role": "user",
-                "content": [
-                    image_block,
-                    {"type": "text", "text": assets.details_task + json.dumps(refs)},
-                ],
+                "content": [_image_block(photo), {"type": "text", "text": task_text}],
             }
         ],
         "output_config": {"format": {"type": "json_schema", "schema": assets.details_schema}},
     }
 
 
-def _parse_structured(message: Any) -> dict:
-    text = None
-    for block in reversed(message.content):
-        if getattr(block, "type", None) == "text":
-            text = block.text
-            break
-    if text is None:
-        raise RuntimeError(f"no text block in response (stop_reason={message.stop_reason})")
-    return json.loads(text)
-
-
-def _create(client: Any, params: dict) -> Any:
-    return client.messages.create(**params)
-
-
-def _batches(items: list[dict]) -> list[list[dict]]:
-    return [items[i : i + DETAILS_BATCH_SIZE] for i in range(0, len(items), DETAILS_BATCH_SIZE)]
-
-
-def _run_photo(
-    client: Any, assets: SharedAssets, model: str, photo: Path, usage: Usage
-) -> list[dict]:
-    """Index, details (warm then fan out), reconcile for a single photo."""
-    from concurrent.futures import ThreadPoolExecutor
-
-    image_block = _photo_block(photo)
-
-    index_msg = _create(client, _index_params(assets, model, image_block))
-    usage.add(index_msg.usage)
-    index_result = _parse_structured(index_msg)
-    index_items = index_result.get("items", [])
-
-    details_by_n: dict[int, dict] = {}
-    call_count = 0
-
-    def run_batch(batch: list[dict]) -> None:
-        nonlocal call_count
-        msg = _create(client, _details_params(assets, model, image_block, batch))
-        usage.add(msg.usage)
-        call_count += 1
-        # Zero cache reads on details calls after the first means the prompt
-        # prefix is not caching, which is a bug per SPEC (system.md must keep
-        # system + image above the 4,096 token floor).
-        if call_count > 1 and getattr(msg.usage, "cache_read_input_tokens", 0) == 0:
-            print(
-                f"  WARNING: details call {call_count} on {photo.name} had zero cache reads",
-                file=sys.stderr,
-            )
-        for item in _parse_structured(msg).get("items", []):
-            details_by_n[item["n"]] = item
-
-    batches = _batches(index_items)
-    if batches:
-        # Batch 1 alone warms the cache (entries become readable only after
-        # the first response begins), then the rest fan out.
-        run_batch(batches[0])
-        rest = batches[1:]
-        if rest:
-            with ThreadPoolExecutor(max_workers=DETAILS_CONCURRENCY) as pool:
-                list(pool.map(run_batch, rest))
-
-    # One retry pass for index items missing from the details results.
-    missing = [it for it in index_items if it["n"] not in details_by_n]
-    for retry_batch in _batches(missing):
-        try:
-            run_batch(retry_batch)
-        except Exception as e:  # noqa: BLE001
-            print(f"  retry batch failed on {photo.name}: {e}", file=sys.stderr)
-    still_missing = [it for it in index_items if it["n"] not in details_by_n]
-    if still_missing:
-        names = ", ".join(it["name"] for it in still_missing)
-        print(f"  UNRECONCILED after retry on {photo.name}: {names}", file=sys.stderr)
-
-    reconciled = []
-    for it in index_items:
-        d = details_by_n.get(it["n"])
-        reconciled.append(
+def _url_params(assets: SharedAssets, url: str, model: str) -> dict:
+    if assets.url_schema is None or assets.url_task is None:
+        raise RuntimeError("url schema or url task prompt not loaded")
+    return {
+        "model": model,
+        "max_tokens": URL_MAX_TOKENS,
+        "system": assets.system_prompt,
+        "messages": [{"role": "user", "content": f"{url}\n\n{assets.url_task}"}],
+        "tools": [
             {
-                "name": it["name"],
-                "section": it.get("section"),
-                "price_text": it.get("price_text"),
-                "price": it.get("price"),
-                "ingredients": (d or {}).get("ingredients", []),
-                "wrap": (d or {}).get("wrap", "unknown"),
-                "is_raw": (d or {}).get("is_raw"),
-                "notes": (d or {}).get("notes"),
-                "flagged": d is None,
+                "type": WEB_FETCH_TOOL_TYPE,
+                "name": "web_fetch",
+                "max_uses": WEB_FETCH_MAX_USES,
+                "max_content_tokens": WEB_FETCH_MAX_CONTENT_TOKENS,
             }
+        ],
+        "output_config": {"format": {"type": "json_schema", "schema": assets.url_schema}},
+    }
+
+
+def _merge_details_into_index(index_items: list[dict], details_by_n: dict[int, dict]) -> list[dict]:
+    merged_items: list[dict] = []
+    for idx_item in index_items:
+        n = idx_item["n"]
+        det = details_by_n.get(n)
+        merged = dict(idx_item)
+        if det:
+            for key in ("ingredients", "wrap", "is_raw", "notes"):
+                if key in det:
+                    merged[key] = det[key]
+        else:
+            # Reconcile miss: never silently dropped, flagged instead.
+            merged["ingredients"] = []
+            merged["wrap"] = "unknown"
+            merged["is_raw"] = None
+            merged["notes"] = "RECONCILE_MISSING"
+        merged_items.append(merged)
+    return merged_items
+
+
+def _run_photo_pipeline(
+    client: "anthropic.Anthropic",
+    assets: SharedAssets,
+    menu_slug: str,
+    photo_index: int,
+    photo: Path,
+    model: str,
+) -> tuple[list[dict], list[CallUsage]]:
+    """index -> details in batches of 8, batch 1 solo to warm the cache,
+    then the rest -> reconcile.
+
+    Mirrors src/extract.ts's request shapes exactly. The browser client's
+    concurrency-3 fan-out for the remaining batches is not reproduced here;
+    evals run sequentially for determinism and debuggability. That is a
+    deliberate, noted divergence from production orchestration, not from
+    the request shape, which matches exactly.
+    """
+    call_usages: list[CallUsage] = []
+
+    index_resp = client.messages.create(**_index_params(assets, photo, model))
+    call_usages.append(CallUsage(menu_slug, photo_index, "index", _usage_from_response(index_resp)))
+    index_items = _extract_json(index_resp).get("items", [])
+
+    batches = [
+        index_items[i : i + DETAILS_BATCH_SIZE] for i in range(0, len(index_items), DETAILS_BATCH_SIZE)
+    ]
+    details_by_n: dict[int, dict] = {}
+
+    for batch_idx, batch in enumerate(batches):
+        kind = "details_batch_1" if batch_idx == 0 else "details_batch_n"
+        resp = client.messages.create(**_details_params(assets, photo, batch, model))
+        call_usages.append(CallUsage(menu_slug, photo_index, kind, _usage_from_response(resp)))
+        for it in _extract_json(resp).get("items", []):
+            details_by_n[it["n"]] = it
+
+    # One retry batch for whatever's still missing after the first pass.
+    missing = [it for it in index_items if it["n"] not in details_by_n]
+    if missing:
+        retry_resp = client.messages.create(**_details_params(assets, photo, missing, model))
+        call_usages.append(
+            CallUsage(menu_slug, photo_index, "details_retry", _usage_from_response(retry_resp))
         )
-    return reconciled
+        for it in _extract_json(retry_resp).get("items", []):
+            details_by_n[it["n"]] = it
+
+    merged_items = _merge_details_into_index(index_items, details_by_n)
+    return merged_items, call_usages
 
 
-def _price_compatible(a: dict, b: dict) -> bool:
-    if a.get("price") is None or b.get("price") is None:
-        return True
-    return abs(float(a["price"]) - float(b["price"])) < 1e-6
-
-
-def merge_photos(per_photo: list[list[dict]]) -> list[dict]:
-    """Merge in photo order with the SPEC dual-condition dedupe: fuzzy name
-    match (token_sort_ratio >= 85) AND compatible price. Keep the record with
-    more ingredients, union the notes."""
+def _fuzzy_merge(all_photo_items: list[list[dict]]) -> list[dict]:
+    """Multi-photo merge and dedupe, per SPEC.md exactly: global id
+    photoIndex:n; two items merge only when fuzzy name match (the same
+    token_sort_ratio >= 85 rule used for golden scoring) AND compatible
+    price (equal, or either side null) both hold; on merge, keep the
+    record with more ingredients and union the notes.
+    """
     merged: list[dict] = []
-    for items in per_photo:
-        for item in items:
-            dup = None
-            for m in merged:
-                score = token_sort_ratio(normalize_name(m["name"]), normalize_name(item["name"]))
-                if score >= NAME_MATCH_THRESHOLD and _price_compatible(m, item):
-                    dup = m
+    for photo_idx, items in enumerate(all_photo_items):
+        for it in items:
+            candidate = dict(it)
+            candidate["_global_id"] = f"{photo_idx}:{it['n']}"
+            match_idx = None
+            for i, existing in enumerate(merged):
+                name_score = token_sort_ratio(
+                    normalize_name(existing["name"]), normalize_name(candidate["name"])
+                )
+                if name_score < NAME_MATCH_THRESHOLD:
+                    continue
+                ep, cp = existing.get("price"), candidate.get("price")
+                compatible = ep is None or cp is None or abs(float(ep) - float(cp)) < 1e-6
+                if compatible:
+                    match_idx = i
                     break
-            if dup is None:
-                merged.append(dict(item))
+            if match_idx is None:
+                merged.append(candidate)
                 continue
-            winner = item if len(item.get("ingredients") or []) > len(dup.get("ingredients") or []) else dup
-            notes = [n for n in (dup.get("notes"), item.get("notes")) if n]
-            dup.update(winner)
-            dup["notes"] = "; ".join(dict.fromkeys(notes)) if notes else None
-            dup["flagged"] = bool(dup.get("flagged")) and bool(item.get("flagged"))
+            existing = merged[match_idx]
+            if len(candidate.get("ingredients", [])) > len(existing.get("ingredients", [])):
+                kept, other = candidate, existing
+            else:
+                kept, other = existing, candidate
+            kept = dict(kept)
+            notes = " ".join(x for x in (kept.get("notes"), other.get("notes")) if x)
+            kept["notes"] = notes or None
+            merged[match_idx] = kept
     return merged
-
-
-def _make_client() -> Any:
-    import anthropic
-
-    return anthropic.Anthropic()
 
 
 def run_pipeline_for_menu(
     menu: Menu, assets: SharedAssets, model: str, use_batch: bool
-) -> tuple[list[dict], Usage]:
+) -> tuple[list[dict], list[CallUsage]]:
     """Run the full per-photo index/details/reconcile pipeline plus merge.
 
-    Returns the merged predicted items and aggregate token usage. Mirrors the
-    production request shapes, including prompt caching and the
-    warm-then-fan-out orchestration, so evals measure the real system.
+    Returns the merged predicted items and the per-call usage records.
+    Mirrors src/extract.ts's request shapes, including prompt caching and
+    the warm-then-fan-out batch ordering, so evals measure the real system.
     """
     if use_batch:
-        return _run_menu_batched(menu, assets, model)
+        return _run_pipeline_for_menu_batch(menu, assets, model)
 
-    client = _make_client()
-    usage = Usage()
-    per_photo = [
-        _run_photo(client, assets, model, photo, usage) for photo in menu.photos
-    ]
-    return merge_photos(per_photo), usage
-
-
-# --------------------------------------------------------------------------
-# Message Batches routing (--batch): 50 percent cheaper for tuning sweeps
-# where latency does not matter. Index calls for all photos go in one batch,
-# then details calls in a second batch; the missing-item retry pass falls
-# back to direct calls because it is small.
-# --------------------------------------------------------------------------
+    client = anthropic.Anthropic()
+    per_photo_items: list[list[dict]] = []
+    call_usages: list[CallUsage] = []
+    for photo_index, photo in enumerate(menu.photos):
+        items, usages = _run_photo_pipeline(client, assets, menu.slug, photo_index, photo, model)
+        per_photo_items.append(items)
+        call_usages.extend(usages)
+    merged = _fuzzy_merge(per_photo_items)
+    return merged, call_usages
 
 
-def _batch_execute(client: Any, requests: list[dict]) -> dict[str, Any]:
-    import time
-
-    batch = client.messages.batches.create(requests=requests)
+def _poll_batch(client: "anthropic.Anthropic", batch_id: str) -> Any:
     while True:
-        batch = client.messages.batches.retrieve(batch.id)
+        batch = client.messages.batches.retrieve(batch_id)
         if batch.processing_status == "ended":
-            break
-        time.sleep(15)
-
-    results: dict[str, Any] = {}
-    for entry in client.messages.batches.results(batch.id):
-        if entry.result.type == "succeeded":
-            results[entry.custom_id] = entry.result.message
-        else:
-            print(f"  batch entry {entry.custom_id}: {entry.result.type}", file=sys.stderr)
-    return results
+            return batch
+        time.sleep(5)
 
 
-def _run_menu_batched(
+def _run_pipeline_for_menu_batch(
     menu: Menu, assets: SharedAssets, model: str
-) -> tuple[list[dict], Usage]:
-    client = _make_client()
-    usage = Usage()
+) -> tuple[list[dict], list[CallUsage]]:
+    """Route the full per-photo pipeline through the Message Batches API.
 
-    image_blocks = {photo: _photo_block(photo) for photo in menu.photos}
+    Two Batches jobs: one for every photo's index call, then (once item
+    counts are known) one for every details batch across every photo, then
+    a third if any items are still missing after that (mirroring the
+    sync path's one-retry rule). Batch results arrive in any order; keyed
+    by custom_id throughout. Written in full but only reachable via
+    --batch, never invoked this session.
+    """
+    client = anthropic.Anthropic()
+    call_usages: list[CallUsage] = []
 
+    # Request is a TypedDict (anthropic.types.messages.batch_create_params.Request);
+    # a plain dict literal satisfies it at runtime with no import needed.
     index_requests = [
-        {
-            "custom_id": f"index-{i}",
-            "params": _index_params(assets, model, image_blocks[photo]),
-        }
-        for i, photo in enumerate(menu.photos)
+        {"custom_id": f"{photo_idx}:index", "params": _index_params(assets, photo, model)}
+        for photo_idx, photo in enumerate(menu.photos)
     ]
-    index_msgs = _batch_execute(client, index_requests)
+    index_batch = client.messages.batches.create(requests=index_requests)
+    index_batch = _poll_batch(client, index_batch.id)
 
-    index_by_photo: dict[int, list[dict]] = {}
-    for i in range(len(menu.photos)):
-        msg = index_msgs.get(f"index-{i}")
-        if msg is None:
-            index_by_photo[i] = []
-            continue
-        usage.add(msg.usage)
-        index_by_photo[i] = _parse_structured(msg).get("items", [])
+    index_items_by_photo: dict[int, list[dict]] = {}
+    for result in client.messages.batches.results(index_batch.id):
+        photo_idx = int(result.custom_id.split(":", 1)[0])
+        if result.result.type == "succeeded":
+            data = _extract_json(result.result.message)
+            index_items_by_photo[photo_idx] = data.get("items", [])
+            call_usages.append(
+                CallUsage(menu.slug, photo_idx, "index", _usage_from_response(result.result.message))
+            )
+        else:
+            index_items_by_photo[photo_idx] = []
 
     details_requests = []
-    for i, photo in enumerate(menu.photos):
-        for j, batch in enumerate(_batches(index_by_photo[i])):
+    batch_map: dict[str, int] = {}
+    for photo_idx, photo in enumerate(menu.photos):
+        items = index_items_by_photo.get(photo_idx, [])
+        batches = [
+            items[i : i + DETAILS_BATCH_SIZE] for i in range(0, len(items), DETAILS_BATCH_SIZE)
+        ]
+        for batch_idx, batch_items in enumerate(batches):
+            custom_id = f"{photo_idx}:{batch_idx}"
+            batch_map[custom_id] = photo_idx
             details_requests.append(
                 {
-                    "custom_id": f"details-{i}-{j}",
-                    "params": _details_params(assets, model, image_blocks[photo], batch),
+                    "custom_id": custom_id,
+                    "params": _details_params(assets, photo, batch_items, model),
                 }
             )
-    details_msgs = _batch_execute(client, details_requests) if details_requests else {}
 
-    per_photo: list[list[dict]] = []
-    for i, photo in enumerate(menu.photos):
-        details_by_n: dict[int, dict] = {}
-        for j, _batch in enumerate(_batches(index_by_photo[i])):
-            msg = details_msgs.get(f"details-{i}-{j}")
-            if msg is None:
-                continue
-            usage.add(msg.usage)
-            for item in _parse_structured(msg).get("items", []):
-                details_by_n[item["n"]] = item
+    details_by_photo: dict[int, dict[int, dict]] = {i: {} for i in range(len(menu.photos))}
+    if details_requests:
+        details_batch = client.messages.batches.create(requests=details_requests)
+        details_batch = _poll_batch(client, details_batch.id)
+        for result in client.messages.batches.results(details_batch.id):
+            photo_idx = batch_map[result.custom_id]
+            batch_idx = int(result.custom_id.split(":", 1)[1])
+            kind = "details_batch_1" if batch_idx == 0 else "details_batch_n"
+            if result.result.type == "succeeded":
+                call_usages.append(
+                    CallUsage(menu.slug, photo_idx, kind, _usage_from_response(result.result.message))
+                )
+                for it in _extract_json(result.result.message).get("items", []):
+                    details_by_photo[photo_idx][it["n"]] = it
 
-        # Small retry pass runs direct, not batched.
-        missing = [it for it in index_by_photo[i] if it["n"] not in details_by_n]
-        for retry_batch in _batches(missing):
-            try:
-                msg = _create(client, _details_params(assets, model, image_blocks[photo], retry_batch))
-                usage.add(msg.usage)
-                for item in _parse_structured(msg).get("items", []):
-                    details_by_n[item["n"]] = item
-            except Exception as e:  # noqa: BLE001
-                print(f"  batched retry failed on {photo.name}: {e}", file=sys.stderr)
+    missing_by_photo: dict[int, list[dict]] = {}
+    for photo_idx in range(len(menu.photos)):
+        index_items = index_items_by_photo.get(photo_idx, [])
+        missing = [it for it in index_items if it["n"] not in details_by_photo[photo_idx]]
+        if missing:
+            missing_by_photo[photo_idx] = missing
 
-        per_photo.append(
-            [
-                {
-                    "name": it["name"],
-                    "section": it.get("section"),
-                    "price_text": it.get("price_text"),
-                    "price": it.get("price"),
-                    "ingredients": (details_by_n.get(it["n"]) or {}).get("ingredients", []),
-                    "wrap": (details_by_n.get(it["n"]) or {}).get("wrap", "unknown"),
-                    "is_raw": (details_by_n.get(it["n"]) or {}).get("is_raw"),
-                    "notes": (details_by_n.get(it["n"]) or {}).get("notes"),
-                    "flagged": it["n"] not in details_by_n,
-                }
-                for it in index_by_photo[i]
-            ]
-        )
+    if missing_by_photo:
+        retry_requests = [
+            {
+                "custom_id": f"{photo_idx}:retry",
+                "params": _details_params(assets, menu.photos[photo_idx], missing, model),
+            }
+            for photo_idx, missing in missing_by_photo.items()
+        ]
+        retry_batch = client.messages.batches.create(requests=retry_requests)
+        retry_batch = _poll_batch(client, retry_batch.id)
+        for result in client.messages.batches.results(retry_batch.id):
+            photo_idx = int(result.custom_id.split(":", 1)[0])
+            if result.result.type == "succeeded":
+                call_usages.append(
+                    CallUsage(
+                        menu.slug, photo_idx, "details_retry", _usage_from_response(result.result.message)
+                    )
+                )
+                for it in _extract_json(result.result.message).get("items", []):
+                    details_by_photo[photo_idx][it["n"]] = it
 
-    return merge_photos(per_photo), usage
+    per_photo_items: list[list[dict]] = []
+    for photo_idx in range(len(menu.photos)):
+        index_items = index_items_by_photo.get(photo_idx, [])
+        merged_items = _merge_details_into_index(index_items, details_by_photo[photo_idx])
+        per_photo_items.append(merged_items)
+
+    merged = _fuzzy_merge(per_photo_items)
+    return merged, call_usages
 
 
 def estimate_cost(usage: Usage) -> float:
@@ -773,6 +833,7 @@ def write_report(
     agg: dict[str, float],
     gate_rows: list[tuple[str, float, float, bool]],
     total_usage: Usage,
+    call_usages: list[CallUsage],
     model: str,
     timestamp: str,
     consistency: Optional[list[dict]] = None,
@@ -823,6 +884,32 @@ def write_report(
     lines.append(f"- output: {total_usage.output_tokens}")
     lines.append(f"- estimated cost: ${estimate_cost(total_usage):.4f}")
     lines.append("")
+    if call_usages:
+        lines.append("### Cache counters by call kind")
+        lines.append("")
+        lines.append("| Kind | Calls | Cache write | Cache read |")
+        lines.append("|---|---|---|---|")
+        for kind in sorted({c.kind for c in call_usages}):
+            kind_calls = [c for c in call_usages if c.kind == kind]
+            cw = sum(c.usage.cache_creation_input_tokens for c in kind_calls)
+            cr = sum(c.usage.cache_read_input_tokens for c in kind_calls)
+            lines.append(f"| {kind} | {len(kind_calls)} | {cw} | {cr} |")
+        lines.append("")
+
+        # Named bug check (T-1.11): details batches 2+ should read from the
+        # cache the index call and details batch 1 warmed. Zero reads here
+        # across every batch-2+ call means caching is broken.
+        details_2plus = [c for c in call_usages if c.kind == "details_batch_n"]
+        if details_2plus:
+            with_reads = [c for c in details_2plus if c.usage.cache_read_input_tokens > 0]
+            bug_flag = "ok" if with_reads else "BUG SUSPECTED"
+            lines.append(
+                f"- cache check (details calls 2+): {len(with_reads)}/{len(details_2plus)} "
+                f"had cache reads > 0 [{bug_flag}]"
+            )
+        else:
+            lines.append("- cache check (details calls 2+): no batch-2+ details calls this run")
+        lines.append("")
     for s in scores:
         if not s.diffs:
             continue
@@ -874,7 +961,7 @@ def cmd_check() -> int:
     # Prove the deterministic scoring layer works, offline, on a tiny fixture.
     _self_test()
     print("scoring self-test: PASS")
-    print("\nreadiness check complete. Scored runs need ANTHROPIC_API_KEY and spend credits.")
+    print("\nreadiness check complete. Run --menu <slug> or --all to spend API credits.")
     return 0
 
 
@@ -923,7 +1010,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         return 2
 
     repeat = max(1, args.repeat)
-    total_usage = Usage()
+    all_call_usages: list[CallUsage] = []
     scores: list[MenuScore] = []
     consistency: list[dict] = []
 
@@ -931,11 +1018,9 @@ def cmd_run(args: argparse.Namespace) -> int:
         run_scores: list[MenuScore] = []
         for r in range(repeat):
             print(f"running {menu.slug}" + (f" (run {r + 1}/{repeat})" if repeat > 1 else ""))
-            pred, usage = run_pipeline_for_menu(menu, assets, model, args.batch)
-            for f_ in ("input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens"):
-                setattr(total_usage, f_, getattr(total_usage, f_) + getattr(usage, f_))
+            pred, call_usages = run_pipeline_for_menu(menu, assets, model, args.batch)
+            all_call_usages.extend(call_usages)
             run_scores.append(score_menu(menu.slug, pred, menu.golden.get("items", []), assets.aliases))
-        # Run 1 feeds the accuracy gates; every run feeds the consistency gate.
         scores.append(run_scores[0])
         if repeat > 1:
             counts = [s.n_pred for s in run_scores]
@@ -953,10 +1038,11 @@ def cmd_run(args: argparse.Namespace) -> int:
                 }
             )
 
+    total_usage = _sum_usage(all_call_usages)
     agg = aggregate(scores)
     gate_rows = evaluate_gates(agg)
     timestamp = args.timestamp or _default_timestamp()
-    path = write_report(scores, agg, gate_rows, total_usage, model, timestamp, consistency or None)
+    path = write_report(scores, agg, gate_rows, total_usage, all_call_usages, model, timestamp, consistency or None)
     print(f"report written: {path}")
     all_pass = all(ok for *_x, ok in gate_rows)
     if consistency:
@@ -972,62 +1058,43 @@ def _default_timestamp() -> str:
 
 
 def cmd_url_smoke(args: argparse.Namespace) -> int:
-    """Loose URL-path smoke checks (T-1.14): reported, not gated.
+    """Loose, ungated URL-path smoke checks against --urls.
 
-    Runs the combined single-call URL extraction against 1 or 2 live menu
-    URLs supplied with --url and applies loose assertions only, because live
-    pages change and are not hand-labeled goldens.
+    Per EVALS.md these never contribute to the pass/fail gates (there is no
+    URL golden set); they only report item and section counts per URL.
+    Genuinely inert without --urls: prints usage guidance and exits without
+    touching the network.
     """
-    model = os.environ.get("MODEL", DEFAULT_MODEL)
+    if not args.urls:
+        print("no --urls given; nothing to smoke-test. Example:", file=sys.stderr)
+        print("  uv run evals/run_evals.py --url-smoke --urls https://example.com/menu", file=sys.stderr)
+        return 2
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        print("ANTHROPIC_API_KEY not set", file=sys.stderr)
+        return 2
     try:
         assets = load_shared_assets()
     except FileNotFoundError as e:
         print(f"cannot run: {e}", file=sys.stderr)
         return 2
-    if not assets.url_task:
-        print("shared/prompts/url-task.md is missing", file=sys.stderr)
-        return 2
-    urls = args.url or []
-    if not urls:
-        print("supply 1 or 2 URLs with --url https://...", file=sys.stderr)
-        return 2
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        print("ANTHROPIC_API_KEY not set", file=sys.stderr)
+    if assets.url_task is None or assets.url_schema is None:
+        print("url task or url schema missing; cannot smoke-test", file=sys.stderr)
         return 2
 
-    url_schema = json.loads(_read_text(SCHEMA_DIR / "url.schema.json"))
-    client = _make_client()
-    ok = True
-    for url in urls:
-        print(f"\nURL smoke: {url}")
-        params = {
-            "model": model,
-            "max_tokens": 8192,
-            "system": [{"type": "text", "text": assets.system_prompt}],
-            "messages": [
-                {"role": "user", "content": [{"type": "text", "text": assets.url_task + url}]}
-            ],
-            "tools": [WEB_FETCH_TOOL],
-            "output_config": {"format": {"type": "json_schema", "schema": url_schema}},
-        }
+    model = os.environ.get("MODEL", DEFAULT_MODEL)
+    client = anthropic.Anthropic()
+    for url in args.urls:
         try:
-            msg = _create(client, params)
-            result = _parse_structured(msg)
-        except Exception as e:  # noqa: BLE001
-            print(f"  FAIL: {e}")
-            ok = False
-            continue
-        items = result.get("items", [])
-        sections = [s.get("name") for s in result.get("sections", [])]
-        print(f"  items: {len(items)}, sections: {sections}")
-        for it in items[:5]:
-            print(f"    - {it.get('name')} ({it.get('price_text')}): {it.get('ingredients')}")
-        # Under 5 items is the SPEC threshold for the snap-a-photo suggestion.
-        if len(items) < 5:
-            print("  WARN: fewer than 5 items, the app would suggest snapping a photo")
-        with_ingredients = sum(1 for it in items if it.get("ingredients"))
-        print(f"  items with ingredients: {with_ingredients}/{len(items)}")
-    return 0 if ok else 1
+            resp = client.messages.create(**_url_params(assets, url, model))
+            data = _extract_json(resp)
+            n_items = len(data.get("items", []))
+            n_sections = len(data.get("sections", []))
+            print(f"{url}: {n_items} item(s), {n_sections} section(s)")
+            if n_items < 5:
+                print("  NOTE: fewer than 5 items, matches SPEC.md's low-yield URL warning")
+        except Exception as e:  # smoke checks report failures, never raise
+            print(f"{url}: FAILED to parse structured output ({e})")
+    return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1038,8 +1105,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--repeat", type=int, default=1, help="consistency runs per menu")
     p.add_argument("--batch", action="store_true", help="route via the Message Batches API")
     p.add_argument("--url-smoke", action="store_true", help="loose URL-path smoke checks (reported, not gated)")
-    p.add_argument("--url", action="append", help="menu URL for --url-smoke (repeatable)")
-    p.add_argument("--timestamp", type=str, help="report filename stem (defaults to the current UTC time)")
+    p.add_argument("--urls", type=str, nargs="*", help="URLs for --url-smoke (space separated)")
+    p.add_argument("--timestamp", type=str, help="report filename stem (caller supplies a real timestamp)")
     return p
 
 

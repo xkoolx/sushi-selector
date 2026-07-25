@@ -22,3 +22,5 @@ dist/
 .DS_Store
 Thumbs.db
 *:Zone.Identifier
+CLAUDE.local.md
+.claude/settings.local.json

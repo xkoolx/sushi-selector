@@ -21,6 +21,15 @@ before scoring, so multi-photo menus exercise the merge logic and any
 false-merge or duplicate leakage shows up directly in item precision and
 recall.
 
+Labeling conventions are LOCKED in evals/menus/README.md in the repo and
+must be mirrored into shared/prompts/system.md (T-1.3): rice stays out of
+ingredients, wrapper lives only in the wrap field, seared tuna is raw,
+beverages are excluded, standard fillings for undescribed rolls are
+inferred and flagged in notes, and restaurant_name is null unless
+literally printed in the photo. Goldens also carry unscored metadata:
+source_photos, and notes fields holding INFERRED and LOW/MED confidence
+flags for reviewer attention.
+
 ## Producing goldens (workflow and rule)
 
 Claude Code drafts each golden by reading the photo directly and hand-labeling

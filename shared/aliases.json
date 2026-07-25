@@ -3,17 +3,11 @@
   "flying fish roe": "tobiko",
   "krab": "imitation crab",
   "salmon roe": "ikura",
-  "bonito flake": "katsuo bushi",
-  "tamago": "egg",
-  "uni": "sea urchin",
-  "maguro": "tuna",
-  "hamachi": "yellowtail",
+  "katsuo bushi": "bonito flake",
+  "freshwater eel": "eel",
   "unagi": "eel",
-  "ebi": "shrimp",
-  "tako": "octopus",
-  "green onion": "scallion",
-  "tempura flakes": "tempura crunch",
-  "crunch": "tempura crunch",
+  "tamago": "egg",
+  "anago": "eel",
   "mayo sauce": "mayo",
-  "eel sauce": "unagi sauce"
+  "ebi": "shrimp"
 }

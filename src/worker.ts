@@ -5,11 +5,10 @@
 
 import aliases from "../shared/aliases.json";
 import {
-  anthropicProvider,
-  ExtractError,
-  type DetailsItemRef,
-  type ExtractRequest,
-  type ImagePayload,
+  createExtractionProvider,
+  resolveModel,
+  type DetailsItem,
+  type ImageInput,
 } from "./extract";
 import { enforceLimit } from "./ratelimit";
 import { mintSessionToken, verifySessionToken, verifyTurnstile } from "./session";
@@ -88,7 +87,7 @@ async function parseBody(request: Request): Promise<Record<string, unknown> | nu
   }
 }
 
-function validImage(value: unknown): ImagePayload | null {
+function validImage(value: unknown): ImageInput | null {
   if (!value || typeof value !== "object") return null;
   const img = value as Record<string, unknown>;
   if (typeof img.media_type !== "string" || !MEDIA_TYPE_ALLOWLIST.has(img.media_type)) return null;
@@ -109,9 +108,9 @@ function validUrl(value: unknown): string | null {
   return value;
 }
 
-function validItems(value: unknown): DetailsItemRef[] | null {
+function validItems(value: unknown): DetailsItem[] | null {
   if (!Array.isArray(value) || value.length === 0 || value.length > MAX_DETAILS_ITEMS) return null;
-  const items: DetailsItemRef[] = [];
+  const items: DetailsItem[] = [];
   for (const entry of value) {
     if (!entry || typeof entry !== "object") return null;
     const it = entry as Record<string, unknown>;
@@ -173,31 +172,36 @@ async function handleExtract(
   const image = validImage(body.image);
   const url = validUrl(body.url);
 
-  let req: ExtractRequest;
-  if (kind === "url") {
-    if (!url) return json({ error: "bad_request", message: "A valid http(s) url up to 250 characters is required" }, 400, cors);
-    req = { kind: "url", url };
-  } else if (kind === "index") {
-    if (!image && !url) return json({ error: "bad_request", message: "Provide image or url" }, 400, cors);
-    req = { kind: "index", image: image ?? undefined, url: image ? undefined : url ?? undefined };
-  } else {
+  try {
+    const provider = createExtractionProvider(env);
+    const model = resolveModel(env);
+
+    if (kind === "url") {
+      if (!url) return json({ error: "bad_request", message: "A valid http(s) url up to 250 characters is required" }, 400, cors);
+      const result = await provider.runUrl(url, model);
+      return json({ ...result.data as Record<string, unknown>, usage: result.usage }, 200, cors);
+    }
+
+    if (kind === "index") {
+      if (!image) return json({ error: "bad_request", message: "Provide image" }, 400, cors);
+      const result = await provider.runIndex(image, model);
+      return json({ ...result.data as Record<string, unknown>, usage: result.usage }, 200, cors);
+    }
+
+    // details
     const items = validItems(body.items);
     if (!items) {
       return json({ error: "bad_request", message: `items must contain 1 to ${MAX_DETAILS_ITEMS} entries` }, 400, cors);
     }
-    if (!image && !url) return json({ error: "bad_request", message: "Provide image or url" }, 400, cors);
-    req = { kind: "details", image: image ?? undefined, url: image ? undefined : url ?? undefined, items };
-  }
-
-  try {
-    const result = await anthropicProvider.extract(req, env);
-    return json({ ...result.json, usage: result.usage }, 200, cors);
+    if (!image) return json({ error: "bad_request", message: "Provide image" }, 400, cors);
+    const result = await provider.runDetails(image, items, model);
+    return json({ ...result.data as Record<string, unknown>, usage: result.usage }, 200, cors);
   } catch (e) {
-    if (e instanceof ExtractError) {
-      const headers = e.status === 429 ? { "Retry-After": "30", ...cors } : cors;
-      return json({ error: e.code, message: e.message }, e.status, headers);
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes("429") || msg.includes("rate")) {
+      return json({ error: "rate_limited", message: "Too many requests, try again shortly." }, 429, { "Retry-After": "30", ...cors });
     }
-    console.log(JSON.stringify({ event: "extract_unhandled_error", error: String(e) }));
+    console.log(JSON.stringify({ event: "extract_unhandled_error", error: msg }));
     return json({ error: "extract_failed", message: "Something went wrong parsing the menu. Try again." }, 502, cors);
   }
 }
