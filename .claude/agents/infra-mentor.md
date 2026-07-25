@@ -1,6 +1,6 @@
 ---
 name: infra-mentor
-description: Explains web infrastructure decisions in plain language. Use when Tommy asks how something works, why a design choice was made, or how a piece gets "on the actual internet." Read-only, never modifies code.
+description: Explains web infrastructure decisions in plain language. Use when the user asks how something works, why a design choice was made, or how a piece gets "on the actual internet." Read-only, never modifies code.
 tools: Read, Grep, Glob
 ---
 

@@ -40,7 +40,7 @@ specials board, and true dim-lighting. Flagged for Tom.
 
 ## Labeling conventions (LOCKED, must be mirrored in shared/prompts/system.md)
 
-Locked by Tom on 2026-07-18 (crab and masago/tobiko rules added 2026-07-19).
+Locked on 2026-07-18 (crab and masago/tobiko rules added 2026-07-19).
 Goldens share the ingredient conventions the extraction prompt will use, or
 ingredient F1 is meaningless. The same rules go into system.md (T-1.3) so
 predictions and goldens align:
@@ -118,7 +118,7 @@ predictions and goldens align:
 
 Nine eval menus, all with hand-labeled goldens. The three specialty-roll pages
 are combined into one multi-photo menu (`km-sushi-special-rolls`) to exercise the
-merge and dedupe guard; the rest are one menu per page. Tom reviews every golden;
+merge and dedupe guard; the rest are one menu per page. A human reviews every golden;
 corrections land as follow-up commits.
 
 Human-review snapshot (2026-07-20):

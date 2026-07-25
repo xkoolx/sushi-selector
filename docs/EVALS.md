@@ -33,7 +33,7 @@ flags for reviewer attention.
 ## Producing goldens (workflow and rule)
 
 Claude Code drafts each golden by reading the photo directly and hand-labeling
-it in a separate, careful pass. Tom reviews and corrects every golden before
+it in a separate, careful pass. A human reviews and corrects every golden before
 it counts. The hard rule: never generate goldens by running the extraction
 pipeline or its prompts, because a system must not grade its own homework.
 Draft labels with fresh eyes, item by item, zoomed in.

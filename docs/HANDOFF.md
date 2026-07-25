@@ -23,10 +23,10 @@ else exists in service of it.
 
 Inputs:
 - This documentation package (docs/).
-- Eval menu photos supplied by Tom in evals/menus/ (see EVALS.md). If they are
+- Eval menu photos supplied in evals/menus/ (see EVALS.md). If they are
   not present yet, build through Phase 0 and the eval harness skeleton, then
   stop and request them. Do not substitute stock or synthetic menu images.
-- Secrets supplied by Tom via wrangler (see DEPLOY.md). Never ask for secret
+- Secrets supplied via wrangler (see DEPLOY.md). Never ask for secret
   values in chat and never write them to any file that is committed.
 
 Outputs:
@@ -35,7 +35,7 @@ Outputs:
 - A passing eval report committed to evals/reports/.
 - A README.md with a project summary, architecture sketch, screenshots, and
   the latest eval results table. The repo is a portfolio artifact; write the
-  README for a technical reader deciding whether Tom knows what he is doing.
+  README for a technical reader evaluating the project's engineering quality.
 
 Success criteria are the acceptance checklist below plus the eval gates in
 EVALS.md. All criteria are verifiable by running something. "It works when I

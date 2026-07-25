@@ -43,8 +43,8 @@ Process:
    - notes: preserve serving details ("2 pcs"), Japanese names ("ebi"), preparation notes ("seared outside"), and any modifiers visible on the menu.
    - Normalize ingredient names to lowercase singular. Use canonical names ("imitation crab" not "krab"), but note the original spelling in notes if it differs materially.
 
-5. Output: the golden.json file plus a summary line per menu (slug, item count, any items where confidence is low and Tom should double-check).
+5. Output: the golden.json file plus a summary line per menu (slug, item count, any items where confidence is low and need human verification).
 
-6. After drafting: remind Tom that he must review and correct every golden before it counts. The golden is not valid until Tom signs off.
+6. After drafting: remind the user that they must review and correct every golden before it counts. The golden is not valid until a human signs off.
 
 No em dashes in output (repo convention).
