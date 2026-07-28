@@ -39,7 +39,7 @@ async function hmacKey(secret: string, usages: ("sign" | "verify")[]): Promise<C
 
 export async function verifyTurnstile(env: Env, token: string, remoteIp: string | null): Promise<boolean> {
   if (!env.TURNSTILE_SECRET_KEY) {
-    if ((env as unknown as Record<string, unknown>).ALLOW_INSECURE_DEV === "true") {
+    if (env.ALLOW_INSECURE_DEV === "true") {
       console.log(JSON.stringify({ event: "turnstile_skipped", reason: "ALLOW_INSECURE_DEV" }));
       return true;
     }

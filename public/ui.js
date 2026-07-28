@@ -49,7 +49,7 @@ export function showProgress(job) {
   showScreen("progress");
 }
 
-export function showResults(job) {
+export function showResults(job, { preserveFilters = false } = {}) {
   currentJob = job;
   currentItems = job.result.items.map((item, i) => ({
     ...item,
@@ -60,7 +60,7 @@ export function showResults(job) {
   showScreen("results");
   $("results-title").textContent = job.result.restaurant_name || "Menu";
   $("omakase-btn").hidden = false;
-  resetFilters();
+  if (!preserveFilters) resetFilters();
   renderResults();
 }
 

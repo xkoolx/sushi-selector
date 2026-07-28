@@ -20,6 +20,7 @@ export interface Env {
   MODEL: string;
   TURNSTILE_SITE_KEY: string;
   ALLOWED_ORIGINS: string;
+  ALLOW_INSECURE_DEV?: string;
   // Secrets (present at runtime, never committed): ANTHROPIC_API_KEY,
   // TURNSTILE_SECRET_KEY, SESSION_HMAC_SECRET.
   ANTHROPIC_API_KEY?: string;

@@ -405,7 +405,7 @@ async function retryItem(item) {
         original.notes = details.notes ?? null;
         original.flagged = false;
       }
-      showResults(currentJobRef);
+      showResults(currentJobRef, { preserveFilters: true });
     }
   } catch {
     showError("Retry failed. You can fix ingredients manually.");
@@ -413,6 +413,70 @@ async function retryItem(item) {
 }
 
 let currentJobRef = null;
+
+// ── URL extraction (single-pass, no photo needed) ──
+
+export async function startUrlJob(url) {
+  const job = {
+    state: "INDEX",
+    jobHash: null,
+    sessionToken: null,
+    photos: null,
+    photoStates: [],
+    result: null,
+    error: null,
+    updatedAt: Date.now(),
+  };
+  currentJobRef = job;
+  job.jobHash = await sha256Hex(url);
+  showProgress(job);
+  updateProgress(job);
+
+  try {
+    job.sessionToken = await getSessionToken();
+    setState(job, "INDEX");
+
+    const data = await apiPost("/api/extract/url", {
+      sessionToken: job.sessionToken,
+      url,
+    });
+
+    const items = (data.items ?? []).map((item, i) => ({
+      id: `0:${item.n ?? i + 1}`,
+      name: item.name,
+      section: item.section ?? null,
+      price_text: item.price_text ?? null,
+      price: item.price ?? null,
+      ingredients: item.ingredients ?? [],
+      wrap: item.wrap ?? "unknown",
+      is_raw: item.is_raw ?? null,
+      notes: item.notes ?? null,
+      flagged: false,
+    }));
+
+    job.result = {
+      restaurant_name: data.restaurant_name ?? null,
+      sections: data.sections ?? [],
+      items,
+      parsedAt: Date.now(),
+    };
+
+    const slug = (job.result.restaurant_name || job.jobHash.slice(0, 12))
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    try {
+      localStorage.setItem(MENU_KEY_PREFIX + slug, JSON.stringify(job.result));
+    } catch { /* best effort */ }
+
+    setState(job, "READY");
+    showResults(job);
+  } catch (e) {
+    job.error = friendlyError(e);
+    job.state = "ERROR";
+    persistJob(job);
+    showError(job.error);
+  }
+  return job;
+}
 
 // ── Init ──
 
@@ -423,6 +487,11 @@ function wireApp() {
     const files = getSelectedFiles();
     if (files.length > 0) {
       startJob(files);
+      return;
+    }
+    const url = getUrlInput();
+    if (url) {
+      startUrlJob(url);
     }
   });
 
