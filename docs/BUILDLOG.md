@@ -1247,3 +1247,94 @@ further prompt investment aimed at that menu, given its volatility
 looks independent of any of the four fixes; and (3) whether the
 harness is worth extending with an optional raw-JSON dump for faster
 future diagnosis.
+
+## Session 2026-08-02: masa-sushi golden intake and raw/ reorganization over 7cc1c5e
+
+Base commit: 7cc1c5e (Restaurant 2 raw photos: paper order sheet, 2
+images)
+
+### Authorized scope (verbatim build card)
+
+Commit the already-staged masa-sushi golden and the 14 staged raw/
+renames exactly as staged: no add, remove, restage, or reformat of
+any kind, no `git add -A`. This is the only unit permitted to run
+before any README, SPEC, or sweep edit. Zero spend: no eval run, no
+model call, for this or any unit of the session.
+
+### Pre-flight
+
+1. `git rev-parse --short HEAD` prints 7cc1c5e. Pass.
+2. `git status --porcelain`: one `A` line for
+   evals/menus/masa-sushi/golden.json, exactly 14 `R` lines (12 into
+   evals/menus/raw/kuu-sushi/, 2 into evals/menus/masa-sushi/photos/),
+   nothing else. Pass.
+3. Staged golden is `A`, not `AM`: `git diff --stat` against the
+   staged path returns empty, confirming no unstaged delta and a
+   determinate commit. Pass.
+4. Per the session's baseline note, the two commits already on top
+   of 439398e (490deef, 7cc1c5e) are pre-reconciled by oversight and
+   get no retrospective entry here and no finding. The 3-line diff
+   inside the staged golden itself (notes at n:11 Calamari Leg, n:13
+   Soft Shell Crab, n:17 Salmon Collar, lowercased to "inferred prep
+   (...)") is Tom applying the INFERRED-token-scope decision directly.
+   It is Tom-verified ground truth and ships as staged, unexamined
+   further by this session.
+
+### Manifest (files touched)
+
+- evals/menus/masa-sushi/golden.json: new, staged prior to this
+  session. 133 items, 8 sections (Appetizers, Sushi & Sashimi,
+  Traditional Roll, New House Special Roll, Fresh Roll, Baked Roll,
+  Tempura Roll, Simple Roll), restaurant_name "Masa Sushi",
+  source_photos IMG_3498 and IMG_3499. Drafted zero-spend and
+  human-verified by Tom on 2026-07-27. Tom's review found 11 real
+  errors, of which the drafter's own confidence flags caught 2; that
+  gap is what drove the lint issue (RAID I-4).
+- evals/menus/masa-sushi/photos/1.jpeg, 2.jpeg: renamed from
+  evals/menus/raw/restaurant-2/IMG_3498.jpeg and IMG_3499.jpeg. Photo
+  order confirmed by Tom, with 1.jpeg as the front page.
+- evals/menus/raw/kuu-sushi/IMG_3433.jpeg through IMG_3444.jpeg (12
+  files): renamed from evals/menus/raw/ directly, as part of the
+  same reorganization, separating KUU's raw provenance photos from
+  the flat raw/ drop folder.
+- docs/BUILDLOG.md: this entry appended.
+
+### Verification
+
+- `git show --stat HEAD` after the commit: 16 paths total, exactly
+  the golden, the 14 renames (12 KUU, 2 masa), and this BUILDLOG
+  entry. No phantom paths.
+- `git status --porcelain` after the commit: empty.
+- No API call made for this unit. Spend: $0.
+
+### Findings for Tom (report-only, no edits made)
+
+None for this unit. The staged content was reviewed only for shape
+(item count, section count, photo count, rename count) against the
+build card's stated figures and the staged index itself, which it
+matches; content correctness of the golden itself is Tom's trust
+gate per the build card and was not re-examined.
+
+### Patterns established
+
+- Committing an already-staged, already-reviewed tree as its own
+  first unit, before any same-session edit touches other files,
+  keeps that commit's diff provably equal to exactly what was staged
+  going in. Verified after the fact with `git show --stat` against
+  the pre-flight's own porcelain listing, rather than trusted from
+  the add step alone.
+- Count every rename from the staged index (`git status --porcelain`,
+  `git show --stat`), never from a doc's descriptive prose. A first
+  draft of this entry took the KUU photo count from
+  evals/menus/README.md's "10-page spiral menu" description and wrote
+  10 renamed files; the actual figure is 12, because the reorganization
+  also moves the 2 happy-hour photos (IMG_3438, IMG_3439) that the
+  README describes as a separate artifact. The doc's page count and
+  the reorganization's file count answer different questions.
+
+### Single next action
+
+None outstanding for this unit. Sessions B and C are unblocked once
+this commit lands; the remaining units of this session (README
+convention propagation, SPEC line 58, KUU wrap sweep) proceed
+independently and land in a second commit.
