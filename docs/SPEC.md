@@ -55,7 +55,7 @@ sushi-selector/
     aliases.json              deterministic ingredient alias table
   evals/
     run_evals.py              PEP 723, run with uv
-    menus/<slug>/photos/1.jpg  (ordered, one or more per menu)
+    menus/<slug>/photos/1.{jpg,jpeg,png}  (ordered, one or more per menu)
     menus/<slug>/golden.json
     reports/
   .github/workflows/deploy.yml

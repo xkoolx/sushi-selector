@@ -1338,3 +1338,172 @@ None outstanding for this unit. Sessions B and C are unblocked once
 this commit lands; the remaining units of this session (README
 convention propagation, SPEC line 58, KUU wrap sweep) proceed
 independently and land in a second commit.
+
+## Session 2026-08-02: ten locked conventions into README, SPEC line 58, KUU wrap sweep over 8f36da3
+
+Base commit: 8f36da3 (this session's own commit 1)
+
+### Authorized scope (verbatim build card)
+
+Edit evals/menus/README.md to carry ten locked conventions (four of
+them amendments to standing text, edited in place, not duplicated);
+correct docs/SPEC.md line 58 (one line, photo path extensions); and
+run a read-only specialty-wrap sweep across the nine KUU golden.json
+files (not masa-sushi), reporting findings without editing any
+golden. Explicitly out of scope: shared/aliases.json (owned by
+session C), shared/prompts/system.md (mirrored by session C),
+evals/run_evals.py (owned by session B), any golden.json content, and
+the price sort key (a render-time T-2.5 implementation detail, noted
+here only). Zero spend for this unit as for the whole session.
+
+### Pre-flight
+
+1. evals/menus/README.md (129 lines) and docs/SPEC.md exist. SPEC.md
+   line 58 read verbatim before edit: `menus/<slug>/photos/1.jpg
+   (ordered, one or more per menu)`. Pass.
+2. evals/run_evals.py:214 read to confirm the harness's accepted
+   photo extensions before writing the SPEC fix: `{".jpg", ".jpeg",
+   ".png"}`. Pass.
+3. No API call required for README/SPEC edits or for the sweep (pure
+   file read and grep/parse over already-committed golden.json data).
+   Pass.
+
+### Manifest (files touched)
+
+- evals/menus/README.md: all ten conventions added. Amendments in
+  place (superseded wording removed, not left standing): the
+  prep-strip exception list closed at seven members (pickle, mayo,
+  fried garlic, fried onion, tempura, smoked, cajun; conventions 2
+  and 3); the wrap-field bullet no longer claims the wrapper is never
+  an ingredient, and now also names the wrapper in `ingredients` when
+  `wrap` is `none` (convention 4); the species-qualifier bullet now
+  points to a newly stated alias-direction governing principle
+  (convention 10), with anatomical parts (convention 9) added as its
+  own bullet immediately before it. New bullets: dual-name rows
+  (convention 1), the crispy-rice carve-out folded into the existing
+  rice bullet (convention 5), conditional ingredients (convention 6),
+  small-choice-sets-included stated explicitly alongside the existing
+  combo bullet (convention 7), and INFERRED token scope, ingredient-
+  only, with the itemized vs. whole-list form distinction (convention
+  8) folded into the existing INFERRED bullet. Verified by grep that
+  neither superseded string ("currently: pickle, mayo, fried garlic,
+  fried onion" nor "the wrapper is never an ingredient") remains
+  anywhere in the file.
+- evals/menus/README.md: separately, at the reviewer's request mid-
+  session, personal-name references were replaced with "the reviewer"
+  throughout this file (the repo is a public portfolio artifact and
+  this file is mirrored into system.md, where a personal name has no
+  referent for the model). One line was explicitly kept unchanged at
+  the reviewer's instruction (the LOCKED header's attribution line).
+  Not touched by this rename, per explicit scope: docs/BUILDLOG.md
+  (this file, an append-only governance log where the named reviewer
+  is the point), any golden.json, shared/prompts/system.md, and the
+  rest of docs/. Occurrence counts at time of check, unedited:
+  docs/EVALS.md 2, docs/HANDOFF.md 7, docs/DEPLOY.md 2, docs/SPEC.md
+  5, docs/BUILDLOG.md 34 (pre-existing, before this entry),
+  shared/prompts/system.md 1, and three golden.json files (km-sushi-
+  hot-appetizer-salad, km-sushi-special-rolls, masa-sushi) contain a
+  personal-name reference; left as-is, golden content is the
+  reviewer's own trust gate.
+- docs/SPEC.md: line 58 only, rewritten to `menus/<slug>/photos/1.
+  {jpg,jpeg,png} (ordered, one or more per menu)`, matching the three
+  extensions run_evals.py:214 actually accepts. No other line
+  touched.
+- docs/BUILDLOG.md: this entry appended.
+- No golden.json anywhere was modified by this unit.
+
+### Verification
+
+- `git diff` on docs/SPEC.md shows exactly one changed line.
+- Grep confirms both superseded README strings are gone and the
+  renamed-conventions' cross-references (wrap bullet to convention 4,
+  species-qualifier bullet to the alias-direction bullet) resolve to
+  text that exists in the file.
+- No API call made for this unit. Spend: $0.
+
+### KUU specialty-wrap sweep (read-only, zero golden files modified)
+
+Scope: the nine KUU goldens (the eight km-sushi-* slugs plus kuu-
+sushi-happy-hour). masa-sushi excluded. Total items measured directly
+from each golden.json: 222 (this session's build card stated 232;
+222 is the measured figure and is what this sweep is based on. Card-
+asserted vs. measured discrepancy noted here, not corrected in the
+card itself, which is out of scope to edit).
+
+Per the reviewer's scope tightening mid-session: `wrap == "none"` is
+the correct value for all nigiri and sashimi items, so that value
+alone is not a candidate signal. Two sets were built instead:
+
+- CANDIDATES: every item whose name or notes contain a wrapper-
+  suggesting token (cucumber, naruto, wrap, wrapped, paper, soy
+  paper, tofu skin, inari, no rice), regardless of wrap value. 12
+  items. Full detail (slug, n, name, wrap, ingredients, notes,
+  assessment) is in this session's closing report, not duplicated
+  here since BUILDLOG is append-only and ships public with the repo.
+  Headline finding: of the 12, only 4 are genuine convention-4
+  specialty-wrap cases (km-sushi-nigiri n=21 Bean Curd/inari; km-
+  sushi-special-rolls n=33 Tiffany, n=38 OMG, n=43 House Cucumber),
+  and in all four the wrapper is already present in that item's
+  `ingredients` array. Convention 4, applied to the existing KUU
+  goldens, indicates zero golden edits across all nine files. The
+  remaining 8 hits are token false positives: cucumber as a filling
+  or salad ingredient, or cucumber appearing only inside a large
+  choice-set list in `notes`, not as a chosen or physical wrap.
+  Also assessed against convention 5 (not a wrapper-token hit, pulled
+  in separately): km-sushi-special-rolls n=40 Crispy Rice Cake
+  currently has no "crispy rice" ingredient entry at all (its
+  `ingredients` array holds only "spicy tuna"; the rice preparation
+  is described in `notes` prose, not the convention's exact term).
+  Flagged for the reviewer's adjudication, not edited.
+- ROSTER: every other `wrap == "none"` item, one compact line each
+  (slug, n, name only), proving full coverage with no item skipped.
+  128 items. Full roster is in the closing report only. Counts by
+  slug only, recorded here: km-sushi-cold-appetizer 8, km-sushi-
+  dinner 15, km-sushi-hot-appetizer-salad 17, km-sushi-lunch 13,
+  km-sushi-nigiri 19, km-sushi-noodles-kitchen 15, km-sushi-sashimi
+  12, km-sushi-special-rolls 2, kuu-sushi-happy-hour 27 (sums to 128).
+
+Zero golden.json files were changed by this sweep. All adjudication
+and any resulting edits are the reviewer's.
+
+### Findings for Tom (report-only, no further edits made)
+
+- Convention 4 applied to the nine existing KUU goldens changes
+  nothing: every genuine specialty-wrap item already names its
+  wrapper in `ingredients`. No backfill pass is needed for this
+  convention specifically.
+- km-sushi-special-rolls n=40 Crispy Rice Cake is a live candidate
+  for convention 5 (the crispy-rice carve-out): "crispy rice" is not
+  currently in its `ingredients` array. Reviewer's call whether to
+  add it.
+- Forward note, not actioned: the price sort key is a render-time
+  derived key belonging in filters.js (not yet built, T-2.5), per
+  explicit build-card scope. It does not appear in README or any
+  prompt asset and should not until T-2.5.
+- This session's build card stated 232 KUU items; the measured total
+  from the nine golden.json files is 222. Left unresolved, since
+  reconciling it is outside this unit's edit scope (no card or README
+  edit was authorized for that count).
+
+### Patterns established
+
+- When a scan token can match on both structural fields (wrap) and
+  free-text fields (name, notes), false positives from the free-text
+  side dominate a small sweep. Splitting into "genuine candidates
+  after reading full context" vs. "roster proving coverage" keeps the
+  reviewer's adjudication list short without hiding the completeness
+  proof.
+- A convention that says "add X" can, once checked against real data,
+  turn out to already be satisfied everywhere it applies. Reporting
+  that as a headline finding (zero edits needed) is more useful to
+  the reviewer than silently confirming each item one by one.
+
+### Single next action
+
+Reviewer's call on: (1) whether to add "crispy rice" to km-sushi-
+special-rolls n=40's ingredients per convention 5; (2) whether the
+232-vs-222 KUU item count discrepancy in the build card is worth
+reconciling, and where; (3) whether the personal-name-to-"the
+reviewer" rename should extend to any of the other docs/ files or
+shared/prompts/system.md, flagged here for session C since system.md
+is outside this session's Files list.
