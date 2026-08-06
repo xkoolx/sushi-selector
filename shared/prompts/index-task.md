@@ -26,7 +26,14 @@ Produce a single JSON object that validates against
     rule. Drop any parenthetical Japanese or alternate name and any
     parenthetical piece count or size qualifier from `name`; the details pass
     is where those get recorded, so this pass reports nothing else about
-    them.
+    them. Exception: when this item is a combo or set item (multiple
+    components bundled under one printed name and price, per the style
+    guide's combo and choice-set section) and the menu prints a
+    contents-describing parenthetical directly after its name, keep that
+    parenthetical in `name` in full, piece counts and all, regardless of
+    whether another item on the page would otherwise collide with the
+    stripped name. A Japanese alternate name or a bare piece/size count on a
+    single, non-combo item still strips as usual.
   - `section`: the name of the section this item falls under (matching one
     of the strings in `sections`), or `null` if the item is not under any
     printed section header.

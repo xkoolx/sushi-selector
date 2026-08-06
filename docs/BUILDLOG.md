@@ -848,3 +848,402 @@ surfaced above (Special B's scallop qualifier, and confirming whether
 the Special A/B/C shrimp-drop is sampling noise or systematic), run the
 eval suite against other menus now that this menu's ingredient gate
 passes, or move to a different T-1.x task.
+
+## Session 2026-07-24: T-1.12 iteration r3, universal prompt fixes over b51350e
+
+Base commit: b51350e (T-1.12 r2: fix ebi/shrimp alias and own-qualifier
+ingredient stripping)
+
+### Authorized scope (verbatim)
+
+SCOPE
+Task: T-1.12 iteration, round 3. Universal prompt fixes from the
+  2026-07-23-all-r1 full-suite run. Only fixes that would be wrong on
+  ANY restaurant's menu. Restaurant-specific tuning deferred per R-8.
+Files:
+  - shared/prompts/system.md (primary: 3 rule additions/refinements)
+  - shared/prompts/index-task.md (parenthetical rule refinement)
+  - shared/aliases.json (one spelling-only alias)
+Not touching: extract.ts, run_evals.py, schemas, goldens,
+  details-task.md
+Dependencies: full-suite report evals/reports/2026-07-23-all-r1.md
+Done when:
+  1. Parenthetical rule refined: strip Japanese alternate names and
+     standalone piece counts; KEEP parentheticals that disambiguate
+     otherwise-identical item names (e.g. "Sushi Combo (9pcs Sushi +
+     Roll)" stays intact because another item is also called "Sushi
+     Combo"). Update both system.md and index-task.md.
+  2. system.md has a combo pricing rule: when a printed price covers
+     multiple items in a set (e.g. "2 for 17.50"), price is null and
+     price_text carries the verbatim text. Upcharge modifiers like
+     "+1" or "+2" also get price null with price_text carrying the
+     modifier.
+  3. Prep method stripping reinforced in system.md with concrete
+     examples from the diffs: "deep fried soft shell crab" -> "soft
+     shell crab", "chopped spicy salmon" -> "spicy salmon", "sauteed
+     steak" -> "steak", "sliced jalapeno" -> "jalapeno", "baked
+     salmon" -> "salmon". Reference the existing exception list
+     (pickle, fried garlic, fried onion).
+  4. aliases.json: add "soy bean" -> "soybean" (spelling fix only).
+  5. uv run evals/run_evals.py --all --timestamp 2026-07-24-r3 runs
+     and the report is committed with the changes.
+  6. The report includes a note: "Single-restaurant golden set (KUU
+     SUSHI). Further iteration deferred pending dataset broadening
+     (R-8, A-1)."
+Priority: these four universal fixes only. Do not chase ingredient
+  completeness gaps, meaning-level aliases, or OCR misread patterns.
+  If new diffs surface, report them, do not fix them.
+
+### Clarification (asked before writing, plan mode)
+
+The scoped report note says "Single-restaurant golden set (KUU
+SUSHI)," but the golden set actually spans two restaurant-name
+prefixes (km-sushi-*, 8 menus; kuu-sushi-happy-hour, 1 menu), confirmed
+by both `--check`'s menu listing and direct inspection. Asked Tom via
+AskUserQuestion whether to write the note verbatim as scoped or correct
+it to match the data; Tom chose verbatim. Written exactly as scoped
+(see Verification); flagged again here and in Findings for the record.
+
+### Pre-flight
+
+1. Working tree clean at b51350e except the pre-existing untracked
+   evals/reports/2026-07-23-all-r1.md (present since before this
+   session; not in this session's files list, left untouched). Pass.
+2. `uv run evals/run_evals.py --check`: shared assets load, 9 menus
+   discovered (8 km-sushi-*, 1 kuu-sushi-happy-hour), scoring self-test
+   PASS, ANTHROPIC_API_KEY present. Pass.
+3. Read all four named files (system.md, index-task.md, aliases.json,
+   the r1 report) plus details-task.md and run_evals.py for scoring
+   mechanics, to ground each fix in exactly the diff evidence cited in
+   scope. Pass.
+
+### Manifest (files touched)
+
+- shared/prompts/system.md: three additions. (1) Item names section:
+  a new paragraph stating the parenthetical-disambiguation exception,
+  using the scoped Sushi Combo example, with a guard that it fires
+  only on an actual same-menu name collision, not whenever a
+  parenthetical looks descriptive. (2) Price fields section: replaced
+  the vague combo-price sentence with an explicit rule (shared-set
+  price and upcharge-only modifiers both get `price: null` with the
+  verbatim text in `price_text`; never split or estimate a per-item
+  number). (3) Preparation methods paragraph: added the five scoped
+  worked examples (deep fried soft shell crab, chopped spicy salmon,
+  sauteed steak, sliced jalapeno, baked salmon), framed as
+  illustrations of the existing rule and exception list, not a new
+  rule.
+- shared/prompts/index-task.md: mirrored the parenthetical
+  disambiguation exception in the `name` bullet, one sentence,
+  referencing the style guide.
+- shared/aliases.json: added `"soy bean": "soybean"` (12 entries
+  total). Did not add edamame -> soybean (meaning-level, deferred per
+  scope).
+- evals/reports/2026-07-24-r3.md: new eval report from this session's
+  verification run, with the scoped note inserted verbatim after the
+  model line.
+- docs/BUILDLOG.md: this entry appended.
+
+### Verification
+
+- `uv run evals/run_evals.py --check` re-run after all four edits:
+  shared assets still load (system.md 20384 to 22491 chars, aliases 11
+  to 12 entries), self-test PASS.
+- Ran (spend gate confirmed by Tom approving the plan with the spend
+  step explicit, per the standing intervention/spend-gate rule):
+  `uv run evals/run_evals.py --all --timestamp 2026-07-24-r3`. Result,
+  evals/reports/2026-07-24-r3.md:
+  - All four gates still FAIL: item_recall 0.7613 (was 0.7883),
+    item_precision 0.6842 (was 0.7353), ingredient_f1_macro 0.7157
+    (was 0.6986), price_accuracy 0.8166 (was 0.8400). Expected: this
+    was a targeted universal-fix round against a single-restaurant
+    golden set, not a gate-passing round (per the scoped report note
+    and R-8/A-1).
+  - Fix 4 (soy bean spelling alias) confirmed working: on
+    km-sushi-hot-appetizer-salad, the soy bean/soybean mismatch is
+    gone from Garlic Soy Beans, Spicy Soy Beans, and plain Soy Beans
+    (present in r1's diffs, absent from r3's). kuu-sushi-happy-hour's
+    Edamame/Garlic Edamame/Spicy Edamame still show the mismatch, as
+    expected (a different, meaning-level alias, correctly out of
+    scope).
+  - Fix 3 (prep-method examples) partially confirmed: Deep Fried Soft
+    Shell Crab, Baked Salmon, and Crazy Horse no longer show their
+    prep-word-prefixed ingredient as an extra (the exact behavior the
+    fix targeted). But one of the scope's own named examples did not
+    take: km-sushi's Gyumori/kuu-sushi-happy-hour still shows
+    `extra=['crab meat', 'sauteed steak', ...]`, the identical
+    "sauteed steak" case named in scope item 3, unresolved this run.
+  - Fix 2 (combo/upcharge pricing) partially confirmed: on
+    km-sushi-lunch, items whose only printed price is an upcharge
+    modifier (Salmon Teriyaki, Steak Teriyaki, Assorted Sashimi)
+    changed from a numeric price with a plain-number price_text in
+    prior rounds to `price: null` with the verbatim modifier
+    (`'ADD$2'`, `'ADD$1'`) this run, matching the new rule's intent.
+    But plain "2 for 17.50" items with no modifier on the same menu
+    (Chicken Teriyaki, Garlic Chicken, Sesame Chicken, Spicy Chicken,
+    Vegetable Tempura, Lemon Shrimp, California Roll, Spicy Tuna Roll,
+    Vegetable Roll, Mixed Tempura) still emit a numeric price
+    unchanged from r1, and km-sushi-dinner's combo-priced items now
+    show `price_text: None` rather than the expected verbatim "2 for
+    23.00". See Findings for the likely cause.
+  - Fix 1 (parenthetical disambiguation) did not resolve its target
+    case. See Findings: the fix's own premise does not hold in the
+    actual golden data.
+
+### Findings for Tom (report-only, no further edits made)
+
+- **Design-level, escalating rather than patching further**: Fix 1's
+  evidence, both in this round's scope and in the original r1 report,
+  describes km-sushi-dinner's "Sushi Combo (9pcs Sushi + Roll)" and
+  "Sushi & Sashimi Combo (5pcs Sushi + 6pcs Sashimi + Roll)" as
+  colliding with another same-named item after parenthetical
+  stripping. Read evals/menus/km-sushi-dinner/golden.json directly to
+  confirm: there is no second "Sushi Combo" or "Sushi & Sashimi Combo"
+  item on this menu. Each combo name is unique even before stripping.
+  So the disambiguation exception, as scoped and as implemented
+  (fires only on an actual same-menu name collision), never triggers
+  for this example, and this run's diff confirms it: both items are
+  still MISSED, with a bare "Sushi Combo" and "Sushi & Sashimi Combo"
+  still predicted as EXTRA. The real defect is different from what was
+  scoped: the golden set's canonical name for a combo item includes
+  its contents/piece-count parenthetical even with no collision,
+  while the general parenthetical-stripping rule (unchanged from r1)
+  still strips it for combo items same as any other item. Fixing that
+  would mean broadening the exception from "collision-only" to
+  "combo/set items with a contents-describing parenthetical always
+  keep it," a materially different and broader rule than what was
+  authorized this round. Not implemented; escalating for a deliberate
+  decision rather than expanding scope unilaterally.
+- The report note ("Single-restaurant golden set (KUU SUSHI)") is
+  committed verbatim per Tom's explicit confirmation this session,
+  though the scored set spans km-sushi (8 menus) and kuu-sushi (1
+  menu). Recorded here for anyone reading the report cold.
+- Fix 2's partial adoption (upcharge-only items changed behavior,
+  plain "2 for X" items did not) is plausibly a menu-layout signal
+  gap rather than a wording gap: items with an explicit per-row "+1"/
+  "+2" marker gave the model an unambiguous per-item cue to null out;
+  items sharing an unmarked "2 for 17.50" banner price may print that
+  number directly on their own row with no per-item "shared" marker,
+  so the model has no textual signal distinguishing "this item's own
+  price" from "the section's shared price" without reading the section
+  layout as a whole. Not re-worded further this session (would be
+  iterating past the single scoped attempt); worth a targeted look at
+  the actual photo if a future round takes this back up.
+- Fix 3's one confirmed miss (Gyumori's "sauteed steak") is the exact
+  example named in scope, unresolved despite the added worked example.
+  Given only one sample per condition, this could be ordinary sampling
+  variance (as flagged in the r2 entry above) rather than the fix
+  failing to register; not chased further this round per the "report,
+  do not fix" priority line.
+- Aggregate gate deltas versus r1 are mixed and mostly small (item
+  recall/precision/price down a few points, ingredient F1 up a couple
+  points), against a backdrop of large, fix-unrelated per-run swings
+  already visible in km-sushi-dinner, km-sushi-noodles-kitchen, and
+  km-sushi-special-rolls (wildly different sets of invented combo/roll
+  items each run, unrelated to any of the four fixes). Consistent with
+  the sampling-variance pattern already noted in the r2 entry; a
+  single `--all` run cannot separate real regression from noise. A
+  `--repeat` consistency run would be needed to say more, and was not
+  in this round's scope.
+
+### Patterns established
+
+- When a scope item's evidence cites "another item is also called X,"
+  verify that claim against the actual golden.json before implementing
+  the fix it justifies, not just against the diff report's MISSED/
+  EXTRA lines. The diff report shows a name-match failure but not why
+  it failed; this round's Fix 1 evidence read correctly from the r1
+  diffs alone but was wrong once checked against the underlying data,
+  and the fix as scoped could not have worked regardless of wording.
+- A narrowly-scoped prompt fix (collision-only exception, upcharge-
+  only null pricing) can partially generalize to unscoped-but-similar
+  cases inconsistently, exposing what textual signal the model
+  actually keyed on (an explicit per-item "+N" marker) versus what the
+  rule's prose implied it should key on (any shared-set pricing). This
+  is useful information for wording a broader version of the rule
+  later, distinct from a bug in this round's wording.
+
+### Single next action
+
+Tom's call on the two escalated design-level items: (1) whether to
+broaden the parenthetical-disambiguation exception to cover any combo/
+set item with a contents-describing parenthetical, not just an actual
+name collision, and (2) whether the "2 for X" combo-price rule needs a
+follow-up pass informed by looking at the actual menu photo layout
+rather than another prose-only prompt iteration. Also open: whether to
+run `--repeat` on one or two menus to separate real signal from
+sampling noise before further prompt iteration.
+
+## Session 2026-07-25: T-1.12 iteration r4, parenthetical rule broadened over b9e4d12
+
+Base commit: b9e4d12 (T-1.12 r3: universal prompt fixes from all-r1
+full-suite run)
+
+### Authorized scope (chat-authorized, not a pasted SCOPE block)
+
+Tom answered the r3 closing report's three escalated open items
+directly in chat:
+1. Broaden the parenthetical rule: "combo items always keep their
+   contents parenthetical" is still a universal fix, not
+   restaurant-specific; r3's collision-only implementation was wrong,
+   not the underlying idea. Authorized one more targeted round to fix
+   it correctly.
+2. Skip the menu-photo inspection for Fix 2's residual "2 for X"
+   pricing gap; noted it may resolve once combo items start matching
+   under item 1's fix, not worth a separate round on its own.
+3. Skip `--repeat`; sampling-variance measurement isn't the best use
+   of budget before the golden set broadens past one restaurant (R-8).
+Treated as this round's scope: files touched limited to
+shared/prompts/system.md and shared/prompts/index-task.md (same
+footprint as r3, corrected content), verified with targeted single-
+menu runs rather than a full `--all` spend, mirroring item 3's
+cost-consciousness.
+
+### Pre-flight
+
+1. Working tree clean at b9e4d12. Pass.
+2. Read the actual golden.json for every one of the 9 menus (not just
+   km-sushi-dinner) to find every item whose gold `name` contains a
+   parenthetical, before writing the broadened rule: confirmed only
+   the same two km-sushi-dinner combo items ("Sushi Combo (9pcs Sushi
+   + Roll)", "Sushi & Sashimi Combo (5pcs Sushi + 6pcs Sashimi +
+   Roll)") have one anywhere in the golden set, so the broadened rule
+   cannot regress any other menu's data. Pass.
+3. Checked km-sushi-sashimi's Special A/B/C (also combo/set items,
+   used as this doc's own hypothetical "Special A (20pcs)" stripping
+   example) against their real golden data: their contents are printed
+   on a separate description line and land in `notes`, with zero
+   parenthetical in the golden `name` at all. Confirms the new rule's
+   distinction (inline contents parenthetical vs. separate description
+   line) does not create an internal contradiction with that existing
+   example. Pass.
+4. `uv run evals/run_evals.py --check`: assets load, self-test PASS.
+   Pass.
+
+### Manifest (files touched)
+
+- shared/prompts/system.md: replaced r3's collision-only exception
+  paragraph in the Item names section. New criterion: a combo or set
+  item (per the Combo and choice-set items section: multiple food
+  components bundled under one printed name and price) keeps its
+  contents-describing parenthetical in `name` whenever the menu prints
+  it directly after the item's own name, as a property of the item
+  type, not a per-menu collision coincidence. A Japanese alternate name
+  or a bare piece/size count on a single, non-combo dish still strips
+  as before.
+- shared/prompts/index-task.md: mirrored the same broadened exception
+  in the `name` bullet.
+- evals/reports/2026-07-25-r4-dinner.md: new, targeted single-menu
+  verification run on km-sushi-dinner (the menu with the two
+  parenthetical-bearing combo items).
+- evals/reports/2026-07-25-r4-lunch.md: new, targeted single-menu
+  verification run on km-sushi-lunch (checks Tom's hypothesis that
+  Fix 2's residual pricing gap resolves incidentally).
+- docs/BUILDLOG.md: this entry appended.
+
+### Verification
+
+- `uv run evals/run_evals.py --check` re-run after edits: assets load
+  (system.md 22491 to 22860 chars), self-test PASS.
+- Spend gate: flagged the two targeted single-menu runs explicitly
+  before firing (progress-check note in chat), consistent with the
+  standing intervention/spend-gate rule; proceeded given Tom's
+  round-opening authorization plus the explicit flag.
+- `uv run evals/run_evals.py --menu km-sushi-dinner --timestamp
+  2026-07-25-r4-dinner` ($0.0374): **fix did not resolve the target
+  case.** Both "Sushi Combo (9pcs Sushi + Roll)" and "Sushi & Sashimi
+  Combo (5pcs Sushi + 6pcs Sashimi + Roll)" are still MISSED golden
+  items; a bare "Sushi Combo" (no parenthetical) is still predicted as
+  EXTRA, plus a new "Sashimi Combo" EXTRA that doesn't even match the
+  gold's "Sushi & Sashimi Combo" wording. Identical failure signature
+  to both r1 and r3. This run's overall extraction on this menu was
+  also unusually noisy: 29 predicted vs. 18 gold items, item_recall
+  0.1667 (worse than r1's 0.278 and r3's 0.333), with many fabricated
+  extras unrelated to any of this project's four fixes (Boston Roll,
+  Yellowtail Jalapeño Roll, Daikon Radish, Ginger Root, Pickled
+  Radish, Oshinko Takuwan). See Findings.
+- `uv run evals/run_evals.py --menu km-sushi-lunch --timestamp
+  2026-07-25-r4-lunch` ($0.0420): item_recall 0.9474, consistent with
+  prior rounds (this menu has no parenthetical-bearing gold items, so
+  it does not directly test Fix 1). Tom's hypothesis that Fix 2's
+  residual pricing gap would resolve once combo items start matching:
+  **not confirmed.** All ten "2 for 17.50" plain numeric-price
+  mismatches (Chicken Teriyaki, Garlic Chicken, Sesame Chicken, Spicy
+  Chicken, Vegetable Tempura, Lemon Shrimp, California Roll, Spicy
+  Tuna Roll, Vegetable Roll, Mixed Tempura) are byte-for-byte unchanged
+  from r3's diff. The three upcharge-only items (Salmon Teriyaki,
+  Steak Teriyaki, Assorted Sashimi: null price plus verbatim 'ADD$1'/
+  'ADD$2') held steady across r3 and r4, confirming that half of Fix 2
+  is stable, not a one-off.
+
+### Findings for Tom (report-only, no further edits made)
+
+- **Escalating rather than attempting a third wording iteration**:
+  this is now three runs (r1, r3, r4) and two structurally different
+  prompt-wording attempts (r3's collision-only test, r4's item-type
+  test, the latter verified against the real golden data first) that
+  have all failed identically on the same two combo items. Per this
+  project's own pattern-recognition rule, a recurring fix should be
+  upgraded, not iterated on with more prose. Not attempting a third
+  wording variant unilaterally; flagging for a deliberate decision on
+  whether prose-only prompt engineering is the right lever here at
+  all, versus (for example) a concrete few-shot example embedded in
+  the prompt, or accepting this as a known single-restaurant-menu
+  limitation and prioritizing R-8/A-1 dataset broadening instead, since
+  a second restaurant's combo-naming conventions may look nothing like
+  this one's.
+- km-sushi-dinner's own-menu extraction quality looks unstable across
+  rounds independent of any of the four fixes (item_recall 0.278 in
+  r1, 0.333 in r3, 0.167 in r4, with a different, mostly nonoverlapping
+  set of hallucinated extra items each time). This menu's photo was
+  never flagged in the original consistency-gate visual inspection
+  (2026-07-22 BUILDLOG entry) as one of the harder photos, but its
+  results are the worst and most volatile in every full-suite report
+  to date. Worth a direct visual check of this specific photo before
+  investing further prompt effort aimed at it specifically, since a
+  hard-to-read source photo would explain volatility no amount of
+  prompt wording can fix.
+- Tooling gap noticed while trying to diagnose the Fix 1 failure: the
+  eval harness reports only name-level diffs (MISSED/EXTRA/mismatch
+  summaries), not the raw per-call model JSON. There's no way from the
+  committed report alone to tell whether the model dropped the
+  parenthetical outright, moved it to `notes` instead of `name`, or
+  never recognized the item as a combo at all. A future harness change
+  to optionally dump raw predicted JSON per run (behind a flag, so it
+  doesn't bloat every report) would make this kind of failure much
+  faster to diagnose. Not built this session (out of the two-file
+  scope authorized).
+- Fix 2's upcharge-only branch (null price, verbatim "+N" text) is
+  confirmed stable across two independent runs (r3, r4) with identical
+  results; treating that half of the fix as solid, distinct from the
+  still-unresolved plain "2 for X" branch.
+
+### Patterns established
+
+- Before broadening a prompt rule's trigger condition, grep every
+  golden.json for the literal pattern the new condition is meant to
+  catch (here, any parenthetical in a gold `name`), not just the one
+  menu named in the evidence. This caught that the rule's other
+  cited-in-doc example ("Special A (20pcs)") never actually occurs in
+  the real data, avoiding a wasted worry about internal contradiction
+  and confirming the broadened rule is a strict, safe widening with
+  zero blast radius on the other 8 menus' scoring.
+- Two consecutive prompt-wording attempts failing identically on the
+  same target, even when the second attempt is verified correct against
+  the underlying data (unlike the first), is itself a signal: the
+  lever being pulled (prose instruction wording) may not be the
+  effective one for this behavior on this model, independent of
+  whether the wording is "correct." Recurrence across independently-
+  reasoned attempts outweighs confidence in any single attempt's
+  internal logic.
+
+### Single next action
+
+Tom's call on: (1) whether to try a structurally different lever for
+the combo-parenthetical case (e.g., a literal few-shot example in
+system.md) instead of a third prose-only iteration, or accept it as a
+known gap pending R-8 dataset broadening; (2) whether a direct visual
+check of km-sushi-dinner's source photo is worth doing before any
+further prompt investment aimed at that menu, given its volatility
+looks independent of any of the four fixes; and (3) whether the
+harness is worth extending with an optional raw-JSON dump for faster
+future diagnosis.
