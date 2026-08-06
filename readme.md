@@ -4,6 +4,12 @@ A mobile-first web app that turns a photo of a restaurant menu into a
 filterable, searchable list of items with ingredients and prices. Point your
 phone at the menu, tap parse, and get answers in under 30 seconds.
 
+<p align="center">
+  <img src="docs/screenshots/home.png" alt="Home screen" width="280" />
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/results.png" alt="Results screen" width="280" />
+</p>
+
 ## How it works
 
 ```
@@ -35,21 +41,56 @@ worker code.
 | Phase | Status | What it covers |
 |-------|--------|----------------|
 | 0. Scaffold | Done | Repo layout, wrangler config, static shell, eval harness skeleton |
-| 1. Extraction | In review | Schemas, prompts, worker proxy, client pipeline, eval harness, CI |
-| 2. UI | Not started | Filter sheet, cards, Omakase shuffle, mobile styling |
-| 3. Deploy | Not started | Turnstile keys, wrangler secrets, CI deploy, post-deploy verification |
-| 4. Polish | Not started | Share links, PWA manifest, README screenshots, HANDOFF acceptance walk |
+| 1. Extraction | Done | Schemas, prompts, worker proxy, client pipeline, eval harness, CI |
+| 2. UI | Done | Filter sheet, cards, Omakase shuffle, PWA, mobile styling |
+| 3. Hardening | Done | Turnstile, HMAC tokens, rate limits, CORS, payload caps, negative tests |
+| 4. Ship | In progress | Deploy workflow, README, final eval run, acceptance checklist |
+
+## Security controls
+
+| Layer | Control | What it stops |
+|-------|---------|---------------|
+| Financial | Anthropic workspace spend cap ($5/month) | Every other control failing at once |
+| Bot | Cloudflare Turnstile, verified server-side | Scripted abuse of the public endpoint |
+| Endpoint auth | HMAC session token, 10 min TTL | Replay and direct curl of extract endpoints |
+| Throughput | Rate limit: 6/60s per token (extract), 3/60s per IP (session) | One abusive client |
+| Input | 1.5 MB payload cap, media_type allowlist, max 10 items per batch | Oversized or malformed requests |
+| Blast radius | Model and max_tokens pinned server-side | Prompt or parameter injection from the client |
+| CORS | Origin allowlist (no wildcard) | Browser-origin confusion (advisory, token is the real guard) |
+
+All controls verified with negative tests: `node scripts/verify-controls.mjs`
+(report in `evals/reports/phase3-verification.txt`).
+
+## Eval results
+
+Latest eval report: `evals/reports/2026-07-25-r4-dinner.md` (Restaurant 1, dinner menu)
+
+| Gate | Threshold | Result |
+|------|-----------|--------|
+| Item recall | >= 0.97 | See latest report |
+| Item precision | >= 0.97 | See latest report |
+| Ingredient F1 (macro) | >= 0.90 | See latest report |
+| Price accuracy | >= 0.97 | See latest report |
+| Consistency (repeat) | F1 spread <= 0.03 | See latest report |
+
+Full eval run blocked on ANTHROPIC_API_KEY configuration (Tom's preflight).
+Reports committed to `evals/reports/` with each prompt iteration.
 
 ## Repo layout
 
 ```
 public/              static frontend (vanilla JS, no build step)
   app.js             orchestrator state machine
+  ui.js              rendering, filter sheet, cards, Omakase
+  filters.js         pure filter/sort/search functions
   preprocess.js      image normalization and downscale
-  index.html         interim capture UI (Phase 2 replaces styling)
+  aliases.js         loads shared/aliases.json via API
+  sw.js              service worker (static asset caching only)
+  index.html         single-page app shell
+  styles.css         mobile-first styling with dark mode
 
 src/                 Cloudflare Worker (TypeScript, compiled by wrangler)
-  worker.ts          router, validation, CORS
+  worker.ts          router, validation, CORS, payload caps
   extract.ts         Anthropic API request construction
   session.ts         Turnstile siteverify + HMAC session tokens
   ratelimit.ts       native rate limit binding wrapper
@@ -57,26 +98,29 @@ src/                 Cloudflare Worker (TypeScript, compiled by wrangler)
 shared/              versioned extraction artifacts (the product)
   prompts/           system prompt, index/details/url task prompts
   schema/            JSON schemas for structured output
-  aliases.json       canonical ingredient mappings (80 entries)
+  aliases.json       canonical ingredient mappings
 
 evals/               extraction quality measurement
   run_evals.py       eval harness (Python, managed by uv)
-  menus/             golden set: 9 menus, 222 items, hand-labeled
+  menus/             golden set with hand-labeled data
   reports/           scored eval reports (committed with prompt changes)
+
+scripts/             development utilities
+  verify-controls.mjs  Phase 3 negative-test harness
+  screenshot.mjs       Playwright screenshot capture for README
 
 docs/                architecture and planning
   SPEC.md            contracts, schemas, UI spec, orchestration
   HANDOFF.md         mission, phases, acceptance checklist
   EVALS.md           quality gates and golden set workflow
   DEPLOY.md          accounts, secrets, deployment steps
-  PLAN.yaml          task breakdown with dependencies
 
 .claude/             Claude Code tooling
   agents/            infra-mentor, qa-runner, security-reviewer
   skills/            golden-drafter, deploy-checklist
   settings.json      project permission defaults
 
-.github/workflows/   CI (typecheck, eval check, secrets scan)
+.github/workflows/   CI (typecheck, eval check, secrets scan) + deploy
 .githooks/           pre-commit: secrets guard + eval gate
 ```
 
@@ -96,6 +140,14 @@ npx wrangler dev
 # POST /api/health to confirm
 ```
 
+Create `.dev.vars` (gitignored) with your secrets:
+
+```
+TURNSTILE_SECRET_KEY=your-turnstile-secret
+SESSION_HMAC_SECRET=any-random-string-for-local-dev
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
 ### Eval harness
 
 ```sh
@@ -103,11 +155,17 @@ npx wrangler dev
 uv run evals/run_evals.py --check
 
 # Scored run (needs API key)
-export ANTHROPIC_API_KEY=sk-ant-...
-uv run evals/run_evals.py --menu km-sushi-nigiri   # single menu, cheap
-uv run evals/run_evals.py --all                     # full run, ~$0.25-0.50
+uv run evals/run_evals.py --menu km-sushi-nigiri   # single menu
+uv run evals/run_evals.py --all                     # full run
 uv run evals/run_evals.py --all --batch             # half price, slower
 uv run evals/run_evals.py --all --repeat 3          # consistency check
+```
+
+### Security control verification
+
+```sh
+# Start dev server, then in another terminal:
+node scripts/verify-controls.mjs
 ```
 
 ### Git hooks (optional)
@@ -119,18 +177,6 @@ git config core.hooksPath .githooks
 Enables two pre-commit checks:
 1. Blocks commits containing secret assignments in source files
 2. Blocks `shared/` changes without an accompanying eval report
-
-## Eval quality gates
-
-All must pass for extraction to be considered reliable:
-
-| Gate | Threshold |
-|------|-----------|
-| Item recall | >= 0.97 |
-| Item precision | >= 0.97 |
-| Ingredient F1 (macro) | >= 0.90 |
-| Price accuracy | >= 0.97 |
-| Consistency (repeat runs) | identical counts, F1 spread <= 0.03 |
 
 ## Architecture decisions
 
