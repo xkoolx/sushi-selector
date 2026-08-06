@@ -170,32 +170,40 @@ async function handleExtract(
   const limited = await enforceLimit(env.EXTRACT_LIMITER, session.jti, cors);
   if (limited) return limited;
 
+  // Validate inputs before touching the API key or extraction provider so
+  // malformed requests are rejected cheaply with 400, not masked by a 502
+  // from a missing ANTHROPIC_API_KEY.
   const image = validImage(body.image);
   const url = validUrl(body.url);
+
+  if (kind === "url") {
+    if (!url) return json({ error: "bad_request", message: "A valid http(s) url up to 250 characters is required" }, 400, cors);
+  } else if (kind === "details") {
+    const items = validItems(body.items);
+    if (!items) return json({ error: "bad_request", message: `items must contain 1 to ${MAX_DETAILS_ITEMS} entries` }, 400, cors);
+    if (!image) return json({ error: "bad_request", message: "Provide image" }, 400, cors);
+  } else {
+    // index
+    if (!image) return json({ error: "bad_request", message: "Provide image" }, 400, cors);
+  }
 
   try {
     const provider = createExtractionProvider(env);
     const model = resolveModel(env);
 
     if (kind === "url") {
-      if (!url) return json({ error: "bad_request", message: "A valid http(s) url up to 250 characters is required" }, 400, cors);
-      const result = await provider.runUrl(url, model);
+      const result = await provider.runUrl(url!, model);
       return json({ ...result.data as Record<string, unknown>, usage: result.usage }, 200, cors);
     }
 
     if (kind === "index") {
-      if (!image) return json({ error: "bad_request", message: "Provide image" }, 400, cors);
-      const result = await provider.runIndex(image, model);
+      const result = await provider.runIndex(image!, model);
       return json({ ...result.data as Record<string, unknown>, usage: result.usage }, 200, cors);
     }
 
-    // details
-    const items = validItems(body.items);
-    if (!items) {
-      return json({ error: "bad_request", message: `items must contain 1 to ${MAX_DETAILS_ITEMS} entries` }, 400, cors);
-    }
-    if (!image) return json({ error: "bad_request", message: "Provide image" }, 400, cors);
-    const result = await provider.runDetails(image, items, model);
+    // details (items already validated above, re-parse for the typed value)
+    const items = validItems(body.items)!;
+    const result = await provider.runDetails(image!, items, model);
     return json({ ...result.data as Record<string, unknown>, usage: result.usage }, 200, cors);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
