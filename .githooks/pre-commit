@@ -1,0 +1,24 @@
+#!/bin/sh
+# Sushi Selector pre-commit hooks
+# Activate with: git config core.hooksPath .githooks
+
+# 1. Secrets guard: block commits containing secret variable names in source files
+if git diff --cached --name-only | grep -qE '\.(ts|js|json|jsonc|md|yaml|yml)$'; then
+  if git diff --cached -U0 | grep -qE '(ANTHROPIC_API_KEY|TURNSTILE_SECRET_KEY|SESSION_HMAC_SECRET)\s*='; then
+    echo "BLOCKED: secret assignment found in staged changes."
+    echo "Secrets belong in wrangler secrets (production) and .dev.vars (local) only."
+    exit 1
+  fi
+fi
+
+# 2. Eval gate: require an eval report when shared/ files change
+SHARED_CHANGED=$(git diff --cached --name-only -- shared/ 2>/dev/null | head -1)
+if [ -n "$SHARED_CHANGED" ]; then
+  REPORT_CHANGED=$(git diff --cached --name-only -- evals/reports/ 2>/dev/null | head -1)
+  if [ -z "$REPORT_CHANGED" ]; then
+    echo "BLOCKED: shared/ files changed without a new eval report in evals/reports/."
+    echo "Run: uv run evals/run_evals.py --all"
+    echo "Then commit the report alongside the shared/ change."
+    exit 1
+  fi
+fi

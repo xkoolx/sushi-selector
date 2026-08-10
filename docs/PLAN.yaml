@@ -1,7 +1,7 @@
 # Sushi Selector: Implementation Plan
 # Version: 1.1
 # Date: 2026-07-15
-# Derived from: ScrollTheory and Tommy K plan v1.0, corrected to match the
+# Derived from: ScrollTheory plan v1.0, corrected to match the
 #   current SPEC.md (URL ingestion and flagged-item fix flow are in MVP; both
 #   have full spec sections). SPEC.md wins on any conflict with this file.
 # Source docs: CLAUDE.md, SPEC.md, HANDOFF.md, EVALS.md, DEPLOY.md
@@ -100,7 +100,7 @@ phases:
 
   - phase: 0
     name: "Scaffold"
-    entry: "Tom preflight complete (DEPLOY.md)"
+    entry: "The ownerpreflight complete (DEPLOY.md)"
     exit: "npx wrangler dev serves index.html with /api/health responding"
     effort: "2 to 4 hours"
     tasks:
@@ -109,7 +109,7 @@ phases:
       - { id: T-0.3, title: "Hello-world worker", detail: "GET /api/health, CORS for dev origin", depends: [T-0.2] }
       - { id: T-0.4, title: "Static shell", detail: "index.html with viewport-fit=cover and manifest link; base styles with safe-area vars", depends: [T-0.1], parallel_with: T-0.3 }
       - { id: T-0.5, title: "Local dev verification", detail: "wrangler dev serves both; screenshot as evidence", depends: [T-0.3, T-0.4] }
-    checkpoint: "Stop here and confirm with Tom before any API-credit spend."
+    checkpoint: "Stop here and confirm with The ownerbefore any API-credit spend."
 
   - phase: 1
     name: "Extraction pipeline and evals"
@@ -126,7 +126,7 @@ phases:
       - { id: T-1.7, title: "ratelimit.ts", detail: "Native binding, two namespaces, 429 with retry-after and friendly copy", depends: [T-0.2, T-1.6] }
       - { id: T-1.8, title: "Worker router", detail: "session, extract/index, extract/details endpoints; CORS, 413, item cap, structured logging", depends: [T-1.5, T-1.6, T-1.7] }
       - { id: T-1.9, title: "Client state machine (app.js)", detail: "Warm-then-fan-out, per-photo pipelines, merge and dedupe, localStorage resume keyed on ordered photo hashes", depends: [T-1.1, T-1.8] }
-      - { id: T-1.10, title: "Organize photos + draft goldens", detail: "Slugify into photos/ dirs; hand-label goldens from photos, never via pipeline", depends: [T-0.1], requires_human: "Tom reviews every golden.json", parallel_with: T-1.5 }
+      - { id: T-1.10, title: "Organize photos + draft goldens", detail: "Slugify into photos/ dirs; hand-label goldens from photos, never via pipeline", depends: [T-0.1], requires_human: "The ownerreviews every golden.json", parallel_with: T-1.5 }
       - { id: T-1.11, title: "Eval harness", detail: "PEP 723 + uv; loads shared/ directly; --all --menu --repeat --batch --url-smoke; report with gates, diffs, cache counters, cost", depends: [T-1.2, T-1.3, T-1.4] }
       - { id: T-1.12, title: "Prompt iteration loop", detail: "Evals, adjust, commit change with report, repeat until gates pass; escalate model only after honest iteration", depends: [T-1.10, T-1.11, T-1.5], note: "Budget most of Phase 1 here" }
       - { id: T-1.13, title: "URL ingestion endpoint", detail: "/api/extract/url per SPEC: web fetch tool (verify current tool name and beta header in live docs), combined schema, max_tokens 8192, fallback to two-phase with url in place of image", depends: [T-1.5, T-1.8] }
@@ -146,7 +146,7 @@ phases:
       - { id: T-2.6, title: "Omakase", detail: "No-repeat shuffle queue, rebuild on filter change, scroll-to-card reveal with chef's pick tag, exhaustion state with second lap and open filters", depends: [T-2.3, T-2.4] }
       - { id: T-2.7, title: "Flagged-item fix flow", detail: "Retry (single-item details call), then fix sheet: vocabulary chips, autocomplete, free text last; edits normalized into facets, edited marker, persisted", depends: [T-2.3] }
       - { id: T-2.8, title: "PWA", detail: "Manifest plus service worker caching static assets only, never /api", depends: [T-2.1], parallel_with: T-2.4 }
-      - { id: T-2.9, title: "Mobile standards verification", detail: "Real phone: no input zoom, 44px targets, safe areas, bottom sheet; screenshots as evidence", depends: [T-2.1, T-2.2, T-2.3, T-2.4], requires_human: "Tom tests on his phone" }
+      - { id: T-2.9, title: "Mobile standards verification", detail: "Real phone: no input zoom, 44px targets, safe areas, bottom sheet; screenshots as evidence", depends: [T-2.1, T-2.2, T-2.3, T-2.4], requires_human: "The ownertests on his phone" }
 
   - phase: 3
     name: "Hardening"
@@ -168,9 +168,9 @@ phases:
     effort: "2 to 4 hours"
     tasks:
       - { id: T-4.1, title: "GitHub Action deploy", detail: "Push to main, wrangler-action (verify current version), least privilege, only Cloudflare secrets in GitHub", depends: [T-3.6] }
-      - { id: T-4.2, title: "Post-deploy verification", detail: "DEPLOY.md checks against live URL plus a real phone parse", depends: [T-4.1], requires_human: "Tom parses from his phone" }
+      - { id: T-4.2, title: "Post-deploy verification", detail: "DEPLOY.md checks against live URL plus a real phone parse", depends: [T-4.1], requires_human: "The ownerparses from his phone" }
       - { id: T-4.3, title: "Final eval report", detail: "Full run committed to evals/reports/", depends: [T-4.2] }
-      - { id: T-4.4, title: "README", detail: "Architecture, screenshots, eval table, security model, for a technical reader", depends: [T-4.3], requires_human: "Tom captures screenshots" }
+      - { id: T-4.4, title: "README", detail: "Architecture, screenshots, eval table, security model, for a technical reader", depends: [T-4.3], requires_human: "The ownercaptures screenshots" }
       - { id: T-4.5, title: "Walk acceptance checklist", detail: "Every HANDOFF item with evidence; undemonstrable item is a reported blocker", depends: [T-4.2, T-4.3, T-4.4] }
 
 critical_path:
@@ -182,10 +182,10 @@ critical_path:
     - "T-1.10 (goldens) starts the moment photos arrive"
     - "T-1.6 and T-1.7 parallel with T-1.5"
   human_gates:
-    - { task: T-1.10, gate: "Tom reviews golden.json files" }
-    - { task: T-2.9, gate: "Tom tests on a real phone" }
-    - { task: T-4.2, gate: "Tom runs a live parse" }
-    - { task: T-4.4, gate: "Tom captures screenshots" }
+    - { task: T-1.10, gate: "The ownerreviews golden.json files" }
+    - { task: T-2.9, gate: "The ownertests on a real phone" }
+    - { task: T-4.2, gate: "The ownerruns a live parse" }
+    - { task: T-4.4, gate: "The ownercaptures screenshots" }
   total_effort: "23 to 42 hours"
 
 post_mvp:

@@ -55,7 +55,7 @@ Priority: this is the only task this session.
 
 ## Session 2026-07-22: reconciliation and rule-enforcement pass over af0c029
 
-Base commit: af0c029 (descendant of 2823343; Tom's adjudication commit
+Base commit: af0c029 (descendant of 2823343; The owner's adjudication commit
 "Adjudicate sweep findings: wrap enum to none, egg canonical, KUU naming")
 
 ### Authorized scope (verbatim)
@@ -77,7 +77,7 @@ Not touching: everything else. Explicitly: nothing under shared/,
 src/, public/, .github/, docs/ other than BUILDLOG.md. No wrangler,
 no eval runs, no Anthropic API calls, no Phase 1 work. Anything
 outside the listed files is report-only.
-Dependencies: Tom's adjudication commit at origin/main (a descendant
+Dependencies: The owner's adjudication commit at origin/main (a descendant
 of 2823343) carrying his four manual edits.
 Done when: pre-flight passed; missing rules integrated; naming fixed;
 all 9 goldens swept against the new rules with (a) applied and (b)
@@ -271,7 +271,7 @@ IMG_3441.jpeg (km-sushi-hot-appetizer-salad) directly.
   checked and ruled out: both rotated but clean and fully legible, no
   meaningful glare, consistent with README tagging them "rotated" only.
 
-### Findings for Tom (report-only, no edits made)
+### Findings for the owner (report-only, no edits made)
 
 - url.schema.json has no `restaurant_name` field. SPEC.md's prose for the
   combined URL schema names only "the details item shape plus section,
@@ -321,7 +321,7 @@ IMG_3441.jpeg (km-sushi-hot-appetizer-salad) directly.
 ### Single next action
 
 Run `uv run evals/run_evals.py --menu km-sushi-nigiri` (or `--all`) once
-Tom authorizes an Anthropic API spend, to get first empirical signal on
+The owner authorizes an Anthropic API spend, to get first empirical signal on
 whether these schemas and prompts produce valid, accurate output before
 iterating further.
 
@@ -510,7 +510,7 @@ what was actually run.
   `--url-smoke` invocation occurred anywhere this session, and no
   Anthropic API call was made.
 
-### Findings for Tom (report-only, no edits made)
+### Findings for the owner (report-only, no edits made)
 
 - Web fetch tool version: SPEC.md's /api/extract/url section says to
   "verify the current web fetch tool name, beta header, and parameters
@@ -571,7 +571,7 @@ The human spend gate: a single index-only probe on km-sushi-sashimi
 (`uv run evals/run_evals.py --menu km-sushi-sashimi`, which will also
 run the details pass and reconcile per the pipeline as implemented; a
 true index-only probe would need a smaller, separate invocation this
-session did not build, since it wasn't in scope), pending Tom's
+session did not build, since it wasn't in scope), pending The owner's
 explicit go. This is the first live signal on whether extract.ts's
 request shapes and the shared prompts/schemas actually produce valid,
 schema-conformant, accurate output.
@@ -666,7 +666,7 @@ km-sushi-sashimi, both confirmed by tracing evals/run_evals.py:
 - Re-read all three files in full for internal consistency (each task
   file's bullets reference the style guide section they draw from; the
   index/details split is stated consistently in both directions).
-- Ran (credit-spend gate confirmed with Tom first, via AskUserQuestion,
+- Ran (credit-spend gate confirmed with the owner first, via AskUserQuestion,
   before executing): `uv run evals/run_evals.py --menu km-sushi-sashimi
   --timestamp 2026-07-23-r1`. Result, evals/reports/2026-07-23-r1.md:
   - item_recall: 0.50 to 1.00 (gate >= 0.97, PASS)
@@ -678,7 +678,7 @@ km-sushi-sashimi, both confirmed by tracing evals/run_evals.py:
   - overall GATES line: FAIL (solely on the ingredient gate above; every
     gate this task's Done-when list named is met)
 
-### Findings for Tom (report-only, no edits made)
+### Findings for the owner (report-only, no edits made)
 
 - ingredient_f1_macro regressed from 1.00 (probe) to 0.7946 (this run),
   now failing its 0.90 gate. This is not a regression this session's
@@ -704,7 +704,7 @@ km-sushi-sashimi, both confirmed by tracing evals/run_evals.py:
   Per this round's Priority line ("name-convention rules only; do not
   tune other aspects yet") and the Not-touching list (aliases.json,
   schemas), neither was touched this session. Flagging both as
-  candidates for the next iteration round, pending Tom's prioritization
+  candidates for the next iteration round, pending The owner's prioritization
   and an explicit go on which one (or both) to take on next, and on
   whether the fix belongs in aliases.json, system.md, or both.
 
@@ -727,7 +727,7 @@ km-sushi-sashimi, both confirmed by tracing evals/run_evals.py:
 
 ### Single next action
 
-Tom's prioritization call on the newly-exposed ingredient_f1_macro
+The owner's prioritization call on the newly-exposed ingredient_f1_macro
 failure (0.7946, gate >= 0.90): whether to run a round 2 iteration now
 on the `ebi` to `shrimp` alias gap and the sea-bream/sweet-shrimp
 species-qualifier-stripping gap identified above, or hold this menu at
@@ -812,7 +812,7 @@ Priority: these two ingredient fixes only; do not tune other aspects.
     (flagged as a known, out-of-scope residual in the r1 findings)
     persists unchanged.
 
-### Findings for Tom (report-only, no edits made)
+### Findings for the owner (report-only, no edits made)
 
 - Special A/B/C's `missing=['shrimp']` diff this run has a different
   shape than r1's (no `extra=['ebi']` companion), suggesting the model
@@ -843,7 +843,7 @@ Priority: these two ingredient fixes only; do not tune other aspects.
 
 ### Single next action
 
-Tom's call on whether to spend a further round on the two residuals
+The owner's call on whether to spend a further round on the two residuals
 surfaced above (Special B's scallop qualifier, and confirming whether
 the Special A/B/C shrimp-drop is sampling noise or systematic), run the
 eval suite against other menus now that this menu's ingredient gate

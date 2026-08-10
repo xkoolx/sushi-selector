@@ -836,6 +836,7 @@ def write_report(
     call_usages: list[CallUsage],
     model: str,
     timestamp: str,
+    consistency: Optional[list[dict]] = None,
 ) -> Path:
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     path = REPORTS_DIR / f"{timestamp}.md"
@@ -862,6 +863,19 @@ def write_report(
             f"{s.ingredient_f1_macro:.3f} | {s.price_accuracy:.3f} | {wrap} |"
         )
     lines.append("")
+    if consistency:
+        lines.append("## Consistency (repeat runs)")
+        lines.append("")
+        lines.append("| Menu | Item counts per run | Counts identical | Ing F1 per run | F1 spread | Result |")
+        lines.append("|---|---|---|---|---|---|")
+        for row in consistency:
+            counts = "/".join(str(c) for c in row["counts"])
+            f1s = "/".join(f"{v:.3f}" for v in row["f1s"])
+            ok = "PASS" if row["ok"] else "FAIL"
+            lines.append(
+                f"| {row['slug']} | {counts} | {'yes' if row['counts_identical'] else 'NO'} | {f1s} | {row['spread']:.4f} | {ok} |"
+            )
+        lines.append("")
     lines.append("## Token usage and cost")
     lines.append("")
     lines.append(f"- input: {total_usage.input_tokens}")
@@ -995,22 +1009,52 @@ def cmd_run(args: argparse.Namespace) -> int:
         print("ANTHROPIC_API_KEY not set", file=sys.stderr)
         return 2
 
+    repeat = max(1, args.repeat)
     all_call_usages: list[CallUsage] = []
     scores: list[MenuScore] = []
+    consistency: list[dict] = []
+
     for menu in menus:
-        pred, call_usages = run_pipeline_for_menu(menu, assets, model, args.batch)
-        all_call_usages.extend(call_usages)
-        scores.append(score_menu(menu.slug, pred, menu.golden.get("items", []), assets.aliases))
+        run_scores: list[MenuScore] = []
+        for r in range(repeat):
+            print(f"running {menu.slug}" + (f" (run {r + 1}/{repeat})" if repeat > 1 else ""))
+            pred, call_usages = run_pipeline_for_menu(menu, assets, model, args.batch)
+            all_call_usages.extend(call_usages)
+            run_scores.append(score_menu(menu.slug, pred, menu.golden.get("items", []), assets.aliases))
+        scores.append(run_scores[0])
+        if repeat > 1:
+            counts = [s.n_pred for s in run_scores]
+            f1s = [s.ingredient_f1_macro for s in run_scores]
+            spread = max(f1s) - min(f1s)
+            counts_identical = len(set(counts)) == 1
+            consistency.append(
+                {
+                    "slug": menu.slug,
+                    "counts": counts,
+                    "counts_identical": counts_identical,
+                    "f1s": f1s,
+                    "spread": spread,
+                    "ok": counts_identical and spread <= GATES["consistency_f1_spread_max"],
+                }
+            )
 
     total_usage = _sum_usage(all_call_usages)
     agg = aggregate(scores)
     gate_rows = evaluate_gates(agg)
-    timestamp = args.timestamp or "report"
-    path = write_report(scores, agg, gate_rows, total_usage, all_call_usages, model, timestamp)
+    timestamp = args.timestamp or _default_timestamp()
+    path = write_report(scores, agg, gate_rows, total_usage, all_call_usages, model, timestamp, consistency or None)
     print(f"report written: {path}")
     all_pass = all(ok for *_x, ok in gate_rows)
+    if consistency:
+        all_pass = all_pass and all(row["ok"] for row in consistency)
     print("GATES: " + ("PASS" if all_pass else "FAIL"))
     return 0 if all_pass else 1
+
+
+def _default_timestamp() -> str:
+    from datetime import datetime, timezone
+
+    return datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
 
 
 def cmd_url_smoke(args: argparse.Namespace) -> int:

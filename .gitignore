@@ -11,6 +11,13 @@ node_modules/
 __pycache__/
 *.pyc
 
+# Build output
+dist/
+
+# Editors
+.vscode/
+.idea/
+
 # OS junk
 .DS_Store
 Thumbs.db

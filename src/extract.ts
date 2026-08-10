@@ -16,13 +16,9 @@
 // per import is the in-file alternative: wrangler's own build (esbuild)
 // never runs tsc's type checker, so this has no effect on the bundle, only
 // on standalone `tsc --noEmit` runs.
-// @ts-expect-error - .md resolved by wrangler's bundler at build time, no tsc type declarations available without a companion .d.ts (out of scope this session)
 import systemPrompt from "../shared/prompts/system.md";
-// @ts-expect-error - .md resolved by wrangler's bundler at build time, no tsc type declarations available without a companion .d.ts (out of scope this session)
 import indexTaskPrompt from "../shared/prompts/index-task.md";
-// @ts-expect-error - .md resolved by wrangler's bundler at build time, no tsc type declarations available without a companion .d.ts (out of scope this session)
 import detailsTaskPrompt from "../shared/prompts/details-task.md";
-// @ts-expect-error - .md resolved by wrangler's bundler at build time, no tsc type declarations available without a companion .d.ts (out of scope this session)
 import urlTaskPrompt from "../shared/prompts/url-task.md";
 import indexSchema from "../shared/schema/index.schema.json";
 import detailsSchema from "../shared/schema/details.schema.json";

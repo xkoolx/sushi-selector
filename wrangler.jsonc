@@ -39,7 +39,8 @@
   "vars": {
     "MODEL": "claude-haiku-4-5-20251001",
     "TURNSTILE_SITE_KEY": "REPLACE_WITH_TURNSTILE_SITE_KEY",
-    "ALLOWED_ORIGINS": "http://localhost:8787"
+    "ALLOWED_ORIGINS": "http://localhost:8787",
+    "ALLOW_INSECURE_DEV": "false"
   },
 
   // Structured log lines per Anthropic call (token usage, cache counters,
@@ -52,8 +53,10 @@
   // Amendment (2026-07-23, user-authorized): src/extract.ts imports the
   // shared prompt files directly so shared/ stays the single source of
   // truth. Wrangler's bundler has no default loader for .md, so this rule
-  // declares them as Text modules (verified against live Cloudflare docs).
+  // declares them as Text modules. The glob must be **/*.md (not
+  // shared/prompts/*.md) because wrangler resolves module rule globs
+  // relative to the entry point directory (src/), not the project root.
   "rules": [
-    { "type": "Text", "globs": ["shared/prompts/*.md"], "fallthrough": true }
+    { "type": "Text", "globs": ["**/*.md"], "fallthrough": true }
   ]
 }
