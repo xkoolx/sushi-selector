@@ -62,6 +62,13 @@ and confirm current shapes from live docs:
   current recommended cloudflare/wrangler-action version for CI:
   https://developers.cloudflare.com/workers/
 
+## Session startup
+
+New sessions: run `/bootstrap` to fan out agents that check the branch, build,
+CI, upstream sync, and project state in parallel. The bridge document
+(`docs/BRIDGE.md`) has the current state snapshot; keep it updated when
+completing significant work.
+
 ## Definition of done
 
 Done means the HANDOFF.md acceptance checklist is walked item by item with
