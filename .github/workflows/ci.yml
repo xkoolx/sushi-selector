@@ -50,9 +50,11 @@ jobs:
           echo "Working tree clean"
       - name: Check git history for leaked secrets
         run: |
-          if git log -p --all -- '*.ts' '*.js' '*.json' '*.jsonc' '*.yaml' '*.yml' | \
+          matches=$(git log -p --all -- '*.ts' '*.js' '*.json' '*.jsonc' '*.yaml' '*.yml' | \
             grep -E '^\+.*((sk-ant-[a-zA-Z0-9]{10,})|ANTHROPIC_API_KEY|TURNSTILE_SECRET_KEY|SESSION_HMAC_SECRET)\s*=' | \
-            grep -v '^\+\+\+' | head -5; then
+            grep -v '^\+\+\+' | head -5 || true)
+          if [ -n "$matches" ]; then
+            echo "$matches"
             echo "::error::Secret reference found in git history"
             exit 1
           fi
